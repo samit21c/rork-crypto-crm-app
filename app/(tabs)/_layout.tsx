@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, FileText, Menu } from 'lucide-react-native';
+import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, Landmark, Banknote, FileText, Menu } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -30,7 +30,7 @@ export default function TabLayout() {
           borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600' as const,
         },
       }}
@@ -57,9 +57,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="deposits"
+        options={{
+          title: 'Deposits',
+          tabBarIcon: ({ color, size }) => <Landmark size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="withdrawals"
+        options={{
+          title: 'Withdraw',
+          tabBarIcon: ({ color, size }) => <Banknote size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Transactions',
+          title: 'History',
           tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
         }}
       />

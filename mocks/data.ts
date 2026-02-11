@@ -1,4 +1,4 @@
-import { User, Supplier, BuyTransaction, SellTransaction } from '@/types';
+import { User, Supplier, BuyTransaction, SellTransaction, BankDeposit, BankWithdrawal } from '@/types';
 
 export const SAMPLE_USERS: User[] = [
   {
@@ -168,3 +168,88 @@ export const SAMPLE_SELL_TRANSACTIONS: SellTransaction[] = [
 ];
 
 export const PAYMENT_MODES = ['Cash', 'IMPS', 'UPI'] as const;
+export const DEPOSIT_MODES = ['Bank Wire', 'UPI', 'Cash'] as const;
+export const WITHDRAW_MODES = ['ATM', 'Cheque', 'UPI-Transfer'] as const;
+
+export const SAMPLE_DEPOSITS: BankDeposit[] = [
+  {
+    id: 'dep-001',
+    code: 'DEP-20260206-A1B2',
+    depositorName: 'Rajesh Kumar',
+    depositorBank: 'HDFC Bank',
+    amount: 500000,
+    mode: 'Bank Wire',
+    isVerified: true,
+    verifiedBy: 'user-001',
+    createdAt: '2026-02-06T08:00:00Z',
+    createdBy: 'user-001',
+  },
+  {
+    id: 'dep-002',
+    code: 'DEP-20260206-C3D4',
+    depositorName: 'Amit Singh',
+    depositorBank: 'ICICI Bank',
+    amount: 250000,
+    mode: 'UPI',
+    isVerified: true,
+    verifiedBy: 'user-002',
+    createdAt: '2026-02-06T10:30:00Z',
+    createdBy: 'user-002',
+  },
+  {
+    id: 'dep-003',
+    code: 'DEP-20260205-E5F6',
+    depositorName: 'Priya Sharma',
+    depositorBank: 'SBI',
+    amount: 750000,
+    mode: 'Cash',
+    isVerified: false,
+    createdAt: '2026-02-05T15:00:00Z',
+    createdBy: 'user-001',
+  },
+  {
+    id: 'dep-004',
+    code: 'DEP-20260204-G7H8',
+    depositorName: 'Vikram Patel',
+    depositorBank: 'Axis Bank',
+    amount: 300000,
+    mode: 'Bank Wire',
+    isVerified: true,
+    verifiedBy: 'user-001',
+    createdAt: '2026-02-04T09:00:00Z',
+    createdBy: 'user-003',
+  },
+];
+
+export const SAMPLE_WITHDRAWALS: BankWithdrawal[] = [
+  {
+    id: 'wth-001',
+    withdrawerName: 'John Trader',
+    withdrawBank: 'HDFC Bank',
+    mode: 'UPI-Transfer',
+    amount: 200000,
+    beneficiariesName: 'CryptoVault Exchange',
+    depositCode: 'DEP-20260206-A1B2',
+    createdAt: '2026-02-06T12:00:00Z',
+    createdBy: 'user-002',
+  },
+  {
+    id: 'wth-002',
+    withdrawerName: 'Sarah Miller',
+    withdrawBank: 'ICICI Bank',
+    mode: 'Cheque',
+    amount: 150000,
+    depositCode: 'DEP-20260206-C3D4',
+    createdAt: '2026-02-06T14:00:00Z',
+    createdBy: 'user-003',
+  },
+  {
+    id: 'wth-003',
+    withdrawerName: 'Admin User',
+    withdrawBank: 'SBI',
+    mode: 'ATM',
+    amount: 50000,
+    createdAt: '2026-02-05T16:30:00Z',
+    createdBy: 'user-001',
+  },
+];

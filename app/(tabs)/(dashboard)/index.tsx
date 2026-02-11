@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { TrendingUp, TrendingDown, DollarSign, Users, ArrowDownCircle, ArrowUpCircle, Package, BarChart3, User } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, DollarSign, Users, ArrowDownCircle, ArrowUpCircle, Package, BarChart3, User, Landmark, Banknote } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
@@ -87,24 +87,55 @@ export default function DashboardScreen() {
           />
         </View>
 
+        <View style={styles.statsRow}>
+          <StatCard
+            title="Deposited"
+            value={`₹${formatNumber(stats.totalDeposited)}`}
+            icon={<Landmark size={18} color={Colors.deposit} />}
+            accentColor={Colors.deposit}
+            accentBg={Colors.depositLight}
+          />
+          <View style={styles.statsGap} />
+          <StatCard
+            title="Withdrawn"
+            value={`₹${formatNumber(stats.totalWithdrawn)}`}
+            subtitle={`Net: ₹${formatNumber(stats.netBankFunds)}`}
+            icon={<Banknote size={18} color={Colors.withdraw} />}
+            accentColor={Colors.withdraw}
+            accentBg={Colors.withdrawLight}
+          />
+        </View>
+
         <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.buyLight }]} onPress={() => router.push('/buy')}>
-            <ArrowDownCircle size={22} color={Colors.buy} />
-            <Text style={[styles.actionText, { color: Colors.buy }]}>Buy USDT</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.sellLight }]} onPress={() => router.push('/sell')}>
-            <ArrowUpCircle size={22} color={Colors.sell} />
-            <Text style={[styles.actionText, { color: Colors.sell }]}>Sell USDT</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.warningLight }]} onPress={() => router.push('/suppliers')}>
-            <Users size={22} color={Colors.warning} />
-            <Text style={[styles.actionText, { color: Colors.warning }]}>Suppliers</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.accentLight }]} onPress={() => router.push('/insights')}>
-            <BarChart3 size={22} color={Colors.accent} />
-            <Text style={[styles.actionText, { color: Colors.accent }]}>Insights</Text>
-          </TouchableOpacity>
+        <View style={styles.actionsGrid}>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.buyLight }]} onPress={() => router.push('/buy')}>
+              <ArrowDownCircle size={22} color={Colors.buy} />
+              <Text style={[styles.actionText, { color: Colors.buy }]}>Buy USDT</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.sellLight }]} onPress={() => router.push('/sell')}>
+              <ArrowUpCircle size={22} color={Colors.sell} />
+              <Text style={[styles.actionText, { color: Colors.sell }]}>Sell USDT</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.depositLight }]} onPress={() => router.push('/deposits')}>
+              <Landmark size={22} color={Colors.deposit} />
+              <Text style={[styles.actionText, { color: Colors.deposit }]}>Deposit</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.withdrawLight }]} onPress={() => router.push('/withdrawals')}>
+              <Banknote size={22} color={Colors.withdraw} />
+              <Text style={[styles.actionText, { color: Colors.withdraw }]}>Withdraw</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.warningLight }]} onPress={() => router.push('/suppliers')}>
+              <Users size={22} color={Colors.warning} />
+              <Text style={[styles.actionText, { color: Colors.warning }]}>Suppliers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: Colors.accentLight }]} onPress={() => router.push('/insights')}>
+              <BarChart3 size={22} color={Colors.accent} />
+              <Text style={[styles.actionText, { color: Colors.accent }]}>Insights</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.sectionHeader}>
@@ -205,10 +236,14 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.buy,
   },
+  actionsGrid: {
+    gap: 10,
+    marginBottom: 8,
+  },
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    gap: 8,
   },
   actionBtn: {
     flex: 1,
@@ -216,7 +251,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 14,
-    marginHorizontal: 4,
   },
   actionText: {
     fontSize: 11,

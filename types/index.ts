@@ -50,6 +50,34 @@ export interface SellTransaction {
 
 export type Transaction = BuyTransaction | SellTransaction;
 
+export type DepositMode = 'Bank Wire' | 'UPI' | 'Cash';
+export type WithdrawMode = 'ATM' | 'Cheque' | 'UPI-Transfer';
+
+export interface BankDeposit {
+  id: string;
+  code: string;
+  depositorName: string;
+  depositorBank: string;
+  amount: number;
+  mode: DepositMode;
+  isVerified: boolean;
+  verifiedBy?: string;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface BankWithdrawal {
+  id: string;
+  withdrawerName: string;
+  withdrawBank: string;
+  mode: WithdrawMode;
+  amount: number;
+  beneficiariesName?: string;
+  depositCode?: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 export interface DashboardStats {
   totalBuyVolume: number;
   totalSellVolume: number;
@@ -60,4 +88,7 @@ export interface DashboardStats {
   balanceVolume: number;
   todayBuyVolume: number;
   todaySellVolume: number;
+  totalDeposited: number;
+  totalWithdrawn: number;
+  netBankFunds: number;
 }

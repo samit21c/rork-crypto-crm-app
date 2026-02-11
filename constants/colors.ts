@@ -27,4 +27,8 @@ export default {
   sellLight: '#D1FAE5',
   shadow: '#000000',
   overlay: 'rgba(0,0,0,0.5)',
+  deposit: '#8B5CF6',
+  depositLight: '#EDE9FE',
+  withdraw: '#F97316',
+  withdrawLight: '#FFF7ED',
 };
