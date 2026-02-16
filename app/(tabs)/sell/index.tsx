@@ -4,6 +4,7 @@ import { Image as ImageIcon, CheckCircle, Link2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, formatUSDT, INR_SYMBOL, USDT_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -28,7 +29,7 @@ export default function SellScreen() {
   const [success, setSuccess] = useState(false);
 
   const clientOptions = useMemo(() =>
-    clients.map(c => ({ label: `${c.name} — ₹${c.contractFund.toLocaleString()}`, value: c.id })),
+    clients.map(c => ({ label: `${c.name} — ${INR_SYMBOL}${c.contractFund.toLocaleString()}`, value: c.id })),
     [clients]
   );
 
@@ -37,7 +38,7 @@ export default function SellScreen() {
       const supplier = suppliers.find(s => s.id === t.supplierId);
       const supplierLabel = supplier ? ` · ${supplier.name}` : '';
       return {
-        label: `${t.volume} USDT @ ₹${t.rate} — ${t.senderName}${supplierLabel}`,
+        label: `${USDT_SYMBOL}${t.volume} USDT @ ${INR_SYMBOL}${t.rate} — ${t.senderName}${supplierLabel}`,
         value: t.id,
       };
     }),
@@ -167,7 +168,7 @@ export default function SellScreen() {
         <View style={styles.successCard}>
           <CheckCircle size={56} color={Colors.accent} />
           <Text style={styles.successTitle}>Entry Added!</Text>
-          <Text style={styles.successSubtext}>Sell transaction of {sellVolume} USDT at ₹{rate} saved.</Text>
+          <Text style={styles.successSubtext}>Sell transaction of {USDT_SYMBOL}{sellVolume} USDT at {INR_SYMBOL}{rate} saved.</Text>
           <TouchableOpacity style={styles.newEntryBtn} onPress={resetForm}>
             <Text style={styles.newEntryText}>New Entry</Text>
           </TouchableOpacity>
@@ -203,7 +204,7 @@ export default function SellScreen() {
           {selectedClient && (
             <View style={styles.autoFillCard}>
               <Text style={styles.autoFillLabel}>Contract Fund</Text>
-              <Text style={styles.autoFillValue}>₹{selectedClient.contractFund.toLocaleString()}</Text>
+              <Text style={styles.autoFillValue}>{formatINR(selectedClient.contractFund)}</Text>
               <Text style={styles.autoFillLabel}>CHZbit Account</Text>
               <Text style={styles.autoFillValue}>{accountCHZbit}</Text>
               {selectedClient.depositUID && (
@@ -237,11 +238,11 @@ export default function SellScreen() {
               <View style={styles.autoFillRow}>
                 <View style={styles.autoFillCol}>
                   <Text style={styles.autoFillLabel}>Volume</Text>
-                  <Text style={styles.autoFillValue}>{selectedBuyTx.volume.toLocaleString()} USDT</Text>
+                  <Text style={styles.autoFillValue}>{USDT_SYMBOL}{selectedBuyTx.volume.toLocaleString()} USDT</Text>
                 </View>
                 <View style={styles.autoFillCol}>
                   <Text style={styles.autoFillLabel}>Buy Rate</Text>
-                  <Text style={styles.autoFillValue}>₹{selectedBuyTx.rate.toFixed(2)}</Text>
+                  <Text style={styles.autoFillValue}>{INR_SYMBOL}{selectedBuyTx.rate.toFixed(2)}</Text>
                 </View>
               </View>
               <Text style={styles.autoFillLabel}>Sender</Text>
@@ -260,28 +261,28 @@ export default function SellScreen() {
 
           <FormInput label="Receiver Name" value={receiverName} onChangeText={setReceiverName} placeholder="Auto-filled or enter manually" testID="sell-receiver" />
           <FormInput label="Trader Name" value={traderName} onChangeText={setTraderName} placeholder="Enter trader name" testID="sell-trader" />
-          <FormInput label="Volume (USDT)" value={volume} onChangeText={setVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-volume" />
-          <FormInput label="Selling Rate (₹)" value={rate} onChangeText={setRate} placeholder="e.g. 87.00" keyboardType="numeric" testID="sell-rate" />
-          <FormInput label="Sell Volume (USDT)" value={sellVolume} onChangeText={setSellVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-sellvolume" />
+          <FormInput label={`Volume (${USDT_SYMBOL} USDT)`} value={volume} onChangeText={setVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-volume" />
+          <FormInput label={`Selling Rate (${INR_SYMBOL})`} value={rate} onChangeText={setRate} placeholder="e.g. 87.00" keyboardType="numeric" testID="sell-rate" />
+          <FormInput label={`Sell Volume (${USDT_SYMBOL} USDT)`} value={sellVolume} onChangeText={setSellVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-sellvolume" />
 
           <View style={styles.calcRow}>
             <View style={styles.calcCard}>
               <Text style={styles.calcLabel}>Profit Margin</Text>
               <Text style={[styles.calcValue, { color: profitMargin >= 0 ? Colors.accent : Colors.danger }]}>
-                ₹{profitMargin.toFixed(2)}
+                {INR_SYMBOL}{profitMargin.toFixed(2)}
               </Text>
             </View>
             <View style={styles.calcGap} />
             <View style={styles.calcCard}>
               <Text style={styles.calcLabel}>Balance Volume</Text>
               <Text style={[styles.calcValue, { color: balanceVolume >= 0 ? Colors.text : Colors.danger }]}>
-                {balanceVolume.toFixed(0)} USDT
+                {USDT_SYMBOL}{balanceVolume.toFixed(0)} USDT
               </Text>
             </View>
           </View>
 
           <View style={styles.calcInfo}>
-            <Text style={styles.calcInfoText}>Avg Buy Rate: ₹{avgBuyRate.toFixed(2)} · Profit = (SellingRate - AvgBuyRate) × SellVolume</Text>
+            <Text style={styles.calcInfoText}>Avg Buy Rate: {INR_SYMBOL}{avgBuyRate.toFixed(2)} · Profit = (SellingRate - AvgBuyRate) × SellVolume</Text>
           </View>
 
           <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Add notes..." multiline testID="sell-remarks" />

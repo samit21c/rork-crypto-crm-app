@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAv
 import { CheckCircle, Search, Trash2, Plus, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -26,7 +27,7 @@ export default function WithdrawalsScreen() {
 
   const modeOptions = WITHDRAW_MODES.map(m => ({ label: m, value: m }));
   const depositCodeOptions = useMemo(() =>
-    deposits.map(d => ({ label: `${d.code} (₹${d.amount.toLocaleString()})`, value: d.code })),
+    deposits.map(d => ({ label: `${d.code} (${formatINR(d.amount)})`, value: d.code })),
     [deposits]
   );
 
@@ -109,7 +110,7 @@ export default function WithdrawalsScreen() {
           <CheckCircle size={56} color={Colors.withdraw} />
           <Text style={styles.successTitle}>Withdrawal Added!</Text>
           <Text style={styles.successSubtext}>
-            ₹{parseFloat(amount).toLocaleString()} withdrawn by {withdrawerName}
+            {formatINR(parseFloat(amount))} withdrawn by {withdrawerName}
             {depositCode ? `\nLinked to ${depositCode}` : ''}
           </Text>
           <View style={styles.successActions}>
@@ -144,7 +145,7 @@ export default function WithdrawalsScreen() {
 
             <FormInput label="Withdrawer Name" value={withdrawerName} onChangeText={setWithdrawerName} placeholder="Enter withdrawer name" testID="wth-name" />
             <FormInput label="Withdraw Bank" value={withdrawBank} onChangeText={setWithdrawBank} placeholder="e.g. HDFC Bank" testID="wth-bank" />
-            <FormInput label="Amount (₹)" value={amount} onChangeText={setAmount} placeholder="e.g. 200000" keyboardType="numeric" testID="wth-amount" />
+            <FormInput label={`Amount (${INR_SYMBOL})`} value={amount} onChangeText={setAmount} placeholder="e.g. 200000" keyboardType="numeric" testID="wth-amount" />
             <Dropdown label="Mode" value={withdrawMode} options={modeOptions} onSelect={setWithdrawMode} placeholder="Select withdrawal mode" />
 
             {withdrawMode === 'UPI-Transfer' && (
@@ -208,7 +209,7 @@ export default function WithdrawalsScreen() {
                     <Text style={[styles.modeTagText, { color: Colors.withdraw }]}>{w.mode}</Text>
                   </View>
                 </View>
-                <Text style={styles.withdrawalAmount}>₹{w.amount.toLocaleString()}</Text>
+                <Text style={styles.withdrawalAmount}>{formatINR(w.amount)}</Text>
               </View>
 
               <View style={styles.cardMid}>

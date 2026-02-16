@@ -4,6 +4,7 @@ import { Image as ImageIcon, CheckCircle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, formatUSDT, INR_SYMBOL, USDT_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -83,7 +84,7 @@ export default function BuyScreen() {
         <View style={styles.successCard}>
           <CheckCircle size={56} color={Colors.accent} />
           <Text style={styles.successTitle}>Entry Added!</Text>
-          <Text style={styles.successSubtext}>Buy transaction of {volume} USDT at ₹{rate} saved successfully.</Text>
+          <Text style={styles.successSubtext}>Buy transaction of {USDT_SYMBOL}{volume} USDT at {INR_SYMBOL}{rate} saved successfully.</Text>
           <TouchableOpacity style={styles.newEntryBtn} onPress={resetForm}>
             <Text style={styles.newEntryText}>New Entry</Text>
           </TouchableOpacity>
@@ -103,8 +104,8 @@ export default function BuyScreen() {
             <Text style={styles.cardTitle}>New Buy Entry</Text>
           </View>
 
-          <FormInput label="Volume (USDT)" value={volume} onChangeText={setVolume} placeholder="e.g. 5000" keyboardType="numeric" testID="buy-volume" />
-          <FormInput label="Rate (₹)" value={rate} onChangeText={setRate} placeholder="e.g. 85.50" keyboardType="numeric" testID="buy-rate" />
+          <FormInput label={`Volume (${USDT_SYMBOL} USDT)`} value={volume} onChangeText={setVolume} placeholder="e.g. 5000" keyboardType="numeric" testID="buy-volume" />
+          <FormInput label={`Rate (${INR_SYMBOL})`} value={rate} onChangeText={setRate} placeholder="e.g. 85.50" keyboardType="numeric" testID="buy-rate" />
           <FormInput label="Sender Name" value={senderName} onChangeText={setSenderName} placeholder="Enter sender name" testID="buy-sender" />
           <Dropdown label="Payment Mode" value={paymentMode} options={paymentOptions} onSelect={setPaymentMode} placeholder="Select payment mode" />
           <Dropdown label="Supplier" value={supplierId} options={supplierOptions} onSelect={setSupplierId} placeholder="Select supplier (optional)" />

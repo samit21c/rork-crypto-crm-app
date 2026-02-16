@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAv
 import { CheckCircle, Search, Trash2, ShieldCheck, ShieldOff, Plus, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateDepositCode } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -113,7 +114,7 @@ export default function DepositsScreen() {
             <Text style={styles.codeLabel}>Unique Code</Text>
             <Text style={styles.codeValue}>{lastCode}</Text>
           </View>
-          <Text style={styles.successSubtext}>₹{parseFloat(amount).toLocaleString()} deposited by {depositorName}</Text>
+          <Text style={styles.successSubtext}>{formatINR(parseFloat(amount))} deposited by {depositorName}</Text>
           <View style={styles.successActions}>
             <TouchableOpacity style={styles.newEntryBtn} onPress={() => { resetForm(); setShowForm(true); }}>
               <Text style={styles.newEntryText}>New Deposit</Text>
@@ -146,7 +147,7 @@ export default function DepositsScreen() {
 
             <FormInput label="Depositor Name" value={depositorName} onChangeText={setDepositorName} placeholder="Enter depositor name" testID="dep-name" />
             <FormInput label="Depositor Bank" value={depositorBank} onChangeText={setDepositorBank} placeholder="e.g. HDFC Bank" testID="dep-bank" />
-            <FormInput label="Amount (₹)" value={amount} onChangeText={setAmount} placeholder="e.g. 500000" keyboardType="numeric" testID="dep-amount" />
+            <FormInput label={`Amount (${INR_SYMBOL})`} value={amount} onChangeText={setAmount} placeholder="e.g. 500000" keyboardType="numeric" testID="dep-amount" />
             <Dropdown label="Mode" value={mode} options={modeOptions} onSelect={setMode} placeholder="Select deposit mode" />
           </View>
 
@@ -204,7 +205,7 @@ export default function DepositsScreen() {
                     <Text style={[styles.modeTagText, { color: Colors.deposit }]}>{dep.mode}</Text>
                   </View>
                 </View>
-                <Text style={styles.depositAmount}>₹{dep.amount.toLocaleString()}</Text>
+                <Text style={styles.depositAmount}>{formatINR(dep.amount)}</Text>
               </View>
 
               <View style={styles.depositMid}>

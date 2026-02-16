@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAv
 import { Search, Plus, X, Trash2, Edit3, CheckCircle, Building2, RefreshCw } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateId } from '@/contexts/DataContext';
 import { FormInput } from '@/components/FormInput';
@@ -171,7 +172,7 @@ export default function CompanyBanksScreen() {
             <FormInput label="City" value={city} onChangeText={setCity} placeholder="e.g. Mumbai" testID="bank-city" />
             <FormInput label="Account Number *" value={accountNo} onChangeText={setAccountNo} placeholder="Enter account number" testID="bank-acct" />
             <FormInput label="IFSC Code" value={ifsc} onChangeText={setIfsc} placeholder="e.g. HDFC0001234" testID="bank-ifsc" />
-            <FormInput label="Closing Balance (₹)" value={closingBalance} onChangeText={setClosingBalance} placeholder="e.g. 2500000" keyboardType="numeric" testID="bank-bal" />
+            <FormInput label={`Closing Balance (${INR_SYMBOL})`} value={closingBalance} onChangeText={setClosingBalance} placeholder="e.g. 2500000" keyboardType="numeric" testID="bank-bal" />
           </View>
 
           <View style={styles.buttonsRow}>
@@ -194,7 +195,7 @@ export default function CompanyBanksScreen() {
         <Building2 size={20} color={Colors.bank} />
         <View style={styles.totalInfo}>
           <Text style={styles.totalLabel}>Total Company Balance</Text>
-          <Text style={styles.totalValue}>₹{totalBalance.toLocaleString()}</Text>
+          <Text style={styles.totalValue}>{formatINR(totalBalance)}</Text>
         </View>
         <Text style={styles.bankCount}>{companyBanks.length} accounts</Text>
       </View>
@@ -232,7 +233,7 @@ export default function CompanyBanksScreen() {
                   <Text style={styles.bankNameText}>{bank.bankName}</Text>
                   <Text style={styles.bankCity}>{bank.city} | {bank.accountNo}</Text>
                 </View>
-                <Text style={styles.bankBalance}>₹{bank.closingBalance.toLocaleString()}</Text>
+                <Text style={styles.bankBalance}>{formatINR(bank.closingBalance)}</Text>
               </View>
 
               <View style={styles.bankMid}>

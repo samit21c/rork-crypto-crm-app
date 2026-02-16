@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { INR_SYMBOL, USDT_SYMBOL } from '@/constants/currency';
 import { Transaction } from '@/types';
 
 interface TransactionCardProps {
@@ -30,9 +31,9 @@ function TransactionCard({ transaction, supplierName, onPress }: TransactionCard
       </View>
       <View style={styles.right}>
         <Text style={[styles.volume, { color }]}>
-          {isBuy ? '+' : '-'}{transaction.volume.toLocaleString()} USDT
+          {isBuy ? '+' : '-'}{USDT_SYMBOL}{transaction.volume.toLocaleString()} USDT
         </Text>
-        <Text style={styles.rate}>₹{transaction.rate.toFixed(2)}</Text>
+        <Text style={styles.rate}>{INR_SYMBOL}{transaction.rate.toFixed(2)}</Text>
       </View>
     </TouchableOpacity>
   );

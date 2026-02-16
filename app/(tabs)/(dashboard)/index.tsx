@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { TrendingUp, TrendingDown, DollarSign, Users, ArrowDownCircle, ArrowUpCircle, Package, BarChart3, User, Landmark, Banknote, UserCheck, Building2, Heart, Clock } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { formatINR, formatUSDT, INR_SYMBOL, USDT_SYMBOL, formatCompact } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import StatCard from '@/components/StatCard';
@@ -22,11 +23,12 @@ export default function DashboardScreen() {
     setTimeout(() => setRefreshing(false), 500);
   }, []);
 
-  const formatNumber = (num: number) => {
-    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
-    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toLocaleString();
+  const formatNumber = (num: number) => formatCompact(num);
+
+  const formatUSDTCompact = (num: number) => {
+    if (num >= 1000000) return `${USDT_SYMBOL}${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${USDT_SYMBOL}${(num / 1000).toFixed(1)}K`;
+    return `${USDT_SYMBOL}${num.toLocaleString()}`;
   };
 
   const overdueDividends = useMemo(() => dividends.filter(d => d.status === 'Overdue').length, [dividends]);
@@ -59,7 +61,7 @@ export default function DashboardScreen() {
           </View>
           <View style={[styles.heroCard, { backgroundColor: Colors.accentLight }]}>
             <DollarSign size={18} color={Colors.accent} />
-            <Text style={[styles.heroValue, { color: Colors.accent }]}>₹{formatNumber(stats.totalContractFunds)}</Text>
+            <Text style={[styles.heroValue, { color: Colors.accent }]}>{formatINR(stats.totalContractFunds, true)}</Text>
             <Text style={styles.heroLabel}>Total Funds</Text>
           </View>
           <View style={[styles.heroCard, { backgroundColor: overdueDividends > 0 ? Colors.dangerLight : Colors.dividendLight }]}>
@@ -72,8 +74,8 @@ export default function DashboardScreen() {
         <View style={styles.statsRow}>
           <StatCard
             title="Buy Volume"
-            value={formatNumber(stats.totalBuyVolume)}
-            subtitle={`Avg ₹${stats.avgBuyRate.toFixed(2)}`}
+            value={formatUSDTCompact(stats.totalBuyVolume)}
+            subtitle={`Avg ${INR_SYMBOL}${stats.avgBuyRate.toFixed(2)}`}
             icon={<TrendingDown size={18} color={Colors.buy} />}
             accentColor={Colors.buy}
             accentBg={Colors.buyLight}
@@ -81,8 +83,8 @@ export default function DashboardScreen() {
           <View style={styles.statsGap} />
           <StatCard
             title="Sell Volume"
-            value={formatNumber(stats.totalSellVolume)}
-            subtitle={`Avg ₹${stats.avgSellRate.toFixed(2)}`}
+            value={formatUSDTCompact(stats.totalSellVolume)}
+            subtitle={`Avg ${INR_SYMBOL}${stats.avgSellRate.toFixed(2)}`}
             icon={<TrendingUp size={18} color={Colors.sell} />}
             accentColor={Colors.sell}
             accentBg={Colors.sellLight}
@@ -92,7 +94,7 @@ export default function DashboardScreen() {
         <View style={styles.statsRow}>
           <StatCard
             title="Total Profit"
-            value={`₹${formatNumber(stats.totalProfit)}`}
+            value={formatINR(stats.totalProfit, true)}
             icon={<DollarSign size={18} color={Colors.accent} />}
             accentColor={Colors.accent}
             accentBg={Colors.accentLight}
@@ -100,8 +102,8 @@ export default function DashboardScreen() {
           <View style={styles.statsGap} />
           <StatCard
             title="Bank Balance"
-            value={`₹${formatNumber(stats.totalBankBalance)}`}
-            subtitle={`Net: ₹${formatNumber(stats.netBankFunds)}`}
+            value={formatINR(stats.totalBankBalance, true)}
+            subtitle={`Net: ${formatINR(stats.netBankFunds, true)}`}
             icon={<Building2 size={18} color={Colors.bank} />}
             accentColor={Colors.bank}
             accentBg={Colors.bankLight}
@@ -111,7 +113,7 @@ export default function DashboardScreen() {
         <View style={styles.statsRow}>
           <StatCard
             title="Deposited"
-            value={`₹${formatNumber(stats.totalDeposited)}`}
+            value={formatINR(stats.totalDeposited, true)}
             icon={<Landmark size={18} color={Colors.deposit} />}
             accentColor={Colors.deposit}
             accentBg={Colors.depositLight}
@@ -119,7 +121,7 @@ export default function DashboardScreen() {
           <View style={styles.statsGap} />
           <StatCard
             title="Div. Paid"
-            value={`₹${formatNumber(stats.totalDividendsPaid)}`}
+            value={formatINR(stats.totalDividendsPaid, true)}
             subtitle={`${stats.pendingDividends} pending`}
             icon={<Heart size={18} color={Colors.dividend} />}
             accentColor={Colors.dividend}

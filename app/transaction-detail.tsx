@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowDownLeft, ArrowUpRight, Trash2, Calendar, CreditCard, User, Package, FileText } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL, USDT_SYMBOL } from '@/constants/currency';
 import { useData } from '@/contexts/DataContext';
 
 export default function TransactionDetailScreen() {
@@ -53,9 +54,9 @@ export default function TransactionDetailScreen() {
     const tx = transaction;
     details.push(
       { label: 'Sender', value: tx.senderName, icon: <User size={16} color={Colors.textSecondary} /> },
-      { label: 'Volume', value: `${tx.volume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
-      { label: 'Rate', value: `₹${tx.rate.toFixed(2)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
-      { label: 'Total Value', value: `₹${(tx.volume * tx.rate).toLocaleString()}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
+      { label: 'Volume', value: `${USDT_SYMBOL}${tx.volume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
+      { label: 'Rate', value: `${INR_SYMBOL}${tx.rate.toFixed(2)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
+      { label: 'Total Value', value: `${formatINR(tx.volume * tx.rate)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
       { label: 'Payment Mode', value: tx.paymentMode, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
       { label: 'Supplier', value: getSupplierName(tx.supplierId), icon: <Package size={16} color={Colors.textSecondary} /> },
       { label: 'Date', value: `${dateStr} at ${timeStr}`, icon: <Calendar size={16} color={Colors.textSecondary} /> },
@@ -66,11 +67,11 @@ export default function TransactionDetailScreen() {
     details.push(
       { label: 'Receiver', value: tx.receiverName, icon: <User size={16} color={Colors.textSecondary} /> },
       { label: 'Account CHZbit', value: tx.accountCHZbit, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
-      { label: 'Volume', value: `${tx.volume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
-      { label: 'Rate', value: `₹${tx.rate.toFixed(2)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
-      { label: 'Sell Volume', value: `${tx.sellVolume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
-      { label: 'Profit Margin', value: `₹${tx.profitMargin.toFixed(2)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
-      { label: 'Balance Volume', value: `${tx.balanceVolume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
+      { label: 'Volume', value: `${USDT_SYMBOL}${tx.volume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
+      { label: 'Rate', value: `${INR_SYMBOL}${tx.rate.toFixed(2)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
+      { label: 'Sell Volume', value: `${USDT_SYMBOL}${tx.sellVolume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
+      { label: 'Profit Margin', value: `${formatINR(tx.profitMargin)}`, icon: <CreditCard size={16} color={Colors.textSecondary} /> },
+      { label: 'Balance Volume', value: `${USDT_SYMBOL}${tx.balanceVolume.toLocaleString()} USDT`, icon: <Package size={16} color={Colors.textSecondary} /> },
       { label: 'Trader', value: tx.traderName, icon: <User size={16} color={Colors.textSecondary} /> },
       { label: 'Supplier', value: getSupplierName(tx.supplierId), icon: <Package size={16} color={Colors.textSecondary} /> },
       { label: 'Date', value: `${dateStr} at ${timeStr}`, icon: <Calendar size={16} color={Colors.textSecondary} /> },
@@ -83,8 +84,8 @@ export default function TransactionDetailScreen() {
       <View style={[styles.typeHeader, { backgroundColor: bgColor }]}>
         {isBuy ? <ArrowDownLeft size={28} color={color} /> : <ArrowUpRight size={28} color={color} />}
         <Text style={[styles.typeLabel, { color }]}>{isBuy ? 'BUY' : 'SELL'} USDT</Text>
-        <Text style={[styles.typeVolume, { color }]}>{transaction.volume.toLocaleString()} USDT</Text>
-        <Text style={styles.typeRate}>at ₹{transaction.rate.toFixed(2)}</Text>
+        <Text style={[styles.typeVolume, { color }]}>{USDT_SYMBOL}{transaction.volume.toLocaleString()} USDT</Text>
+        <Text style={styles.typeRate}>at {INR_SYMBOL}{transaction.rate.toFixed(2)}</Text>
       </View>
 
       <View style={styles.detailsCard}>

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TrendingUp, TrendingDown, DollarSign, ArrowRight, Landmark, Banknote, ArrowDownUp, UserCheck, Heart, Building2, AlertCircle } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { formatINR, formatUSDT, INR_SYMBOL, USDT_SYMBOL } from '@/constants/currency';
 import { useData } from '@/contexts/DataContext';
 
 export default function InsightsScreen() {
@@ -99,17 +100,17 @@ export default function InsightsScreen() {
       <View style={styles.todayRow}>
         <View style={[styles.todayCard, { backgroundColor: Colors.buyLight }]}>
           <TrendingDown size={18} color={Colors.buy} />
-          <Text style={[styles.todayValue, { color: Colors.buy }]}>{todayBuyVol.toLocaleString()}</Text>
+          <Text style={[styles.todayValue, { color: Colors.buy }]}>{USDT_SYMBOL}{todayBuyVol.toLocaleString()}</Text>
           <Text style={[styles.todayLabel, { color: Colors.buy }]}>Bought</Text>
         </View>
         <View style={[styles.todayCard, { backgroundColor: Colors.sellLight }]}>
           <TrendingUp size={18} color={Colors.sell} />
-          <Text style={[styles.todayValue, { color: Colors.sell }]}>{todaySellVol.toLocaleString()}</Text>
+          <Text style={[styles.todayValue, { color: Colors.sell }]}>{USDT_SYMBOL}{todaySellVol.toLocaleString()}</Text>
           <Text style={[styles.todayLabel, { color: Colors.sell }]}>Sold</Text>
         </View>
         <View style={[styles.todayCard, { backgroundColor: Colors.accentLight }]}>
           <DollarSign size={18} color={Colors.accent} />
-          <Text style={[styles.todayValue, { color: Colors.accent }]}>₹{todayProfit.toFixed(0)}</Text>
+          <Text style={[styles.todayValue, { color: Colors.accent }]}>{INR_SYMBOL}{todayProfit.toFixed(0)}</Text>
           <Text style={[styles.todayLabel, { color: Colors.accent }]}>Profit</Text>
         </View>
       </View>
@@ -123,7 +124,7 @@ export default function InsightsScreen() {
         </View>
         <View style={[styles.miniStatCard, { borderLeftColor: Colors.accent }]}>
           <DollarSign size={18} color={Colors.accent} />
-          <Text style={styles.miniStatValue}>₹{(stats.totalContractFunds / 100000).toFixed(1)}L</Text>
+          <Text style={styles.miniStatValue}>{formatINR(stats.totalContractFunds, true)}</Text>
           <Text style={styles.miniStatLabel}>Contract Funds</Text>
         </View>
       </View>
@@ -131,7 +132,7 @@ export default function InsightsScreen() {
       <Text style={styles.sectionTitle}>Dividend Summary</Text>
       <View style={styles.dividendStatsRow}>
         <View style={[styles.dividendCard, { backgroundColor: Colors.accentLight }]}>
-          <Text style={[styles.dividendCardValue, { color: Colors.accent }]}>₹{dividendStats.paidAmount.toLocaleString()}</Text>
+          <Text style={[styles.dividendCardValue, { color: Colors.accent }]}>{formatINR(dividendStats.paidAmount)}</Text>
           <Text style={styles.dividendCardLabel}>{dividendStats.paidCount} Paid</Text>
         </View>
         <View style={[styles.dividendCard, { backgroundColor: Colors.warningLight }]}>
@@ -157,7 +158,7 @@ export default function InsightsScreen() {
                   </View>
                   <View style={styles.clientROIRight}>
                     <Text style={styles.clientROIValue}>{client.roi.toFixed(1)}%</Text>
-                    <Text style={styles.clientROIPaid}>₹{client.totalDivPaid.toLocaleString()} paid</Text>
+                    <Text style={styles.clientROIPaid}>{formatINR(client.totalDivPaid)} paid</Text>
                   </View>
                 </View>
                 <View style={styles.clientBarTrack}>
@@ -183,7 +184,7 @@ export default function InsightsScreen() {
                   <Text style={styles.bankROIName}>{bank.bankName}</Text>
                   <Text style={styles.bankROICity}>{bank.city}</Text>
                 </View>
-                <Text style={styles.bankROIBal}>₹{bank.closingBalance.toLocaleString()}</Text>
+                <Text style={styles.bankROIBal}>{formatINR(bank.closingBalance)}</Text>
               </View>
               {i < companyBanks.length - 1 && <View style={styles.overallDivider} />}
             </View>
@@ -191,7 +192,7 @@ export default function InsightsScreen() {
           <View style={styles.overallDivider} />
           <View style={styles.bankTotalRow}>
             <Text style={styles.bankTotalLabel}>Total Balance</Text>
-            <Text style={styles.bankTotalValue}>₹{stats.totalBankBalance.toLocaleString()}</Text>
+            <Text style={styles.bankTotalValue}>{formatINR(stats.totalBankBalance)}</Text>
           </View>
         </View>
       )}
@@ -200,42 +201,42 @@ export default function InsightsScreen() {
       <View style={styles.overallCard}>
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Total Buy Volume</Text>
-          <Text style={styles.overallValue}>{stats.totalBuyVolume.toLocaleString()} USDT</Text>
+          <Text style={styles.overallValue}>{USDT_SYMBOL}{stats.totalBuyVolume.toLocaleString()} USDT</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Total Buy Value</Text>
-          <Text style={styles.overallValue}>₹{totalBuyValue.toLocaleString()}</Text>
+          <Text style={styles.overallValue}>{formatINR(totalBuyValue)}</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Avg Buy Rate</Text>
-          <Text style={styles.overallValue}>₹{stats.avgBuyRate.toFixed(2)}</Text>
+          <Text style={styles.overallValue}>{INR_SYMBOL}{stats.avgBuyRate.toFixed(2)}</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Total Sell Volume</Text>
-          <Text style={styles.overallValue}>{stats.totalSellVolume.toLocaleString()} USDT</Text>
+          <Text style={styles.overallValue}>{USDT_SYMBOL}{stats.totalSellVolume.toLocaleString()} USDT</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Total Sell Value</Text>
-          <Text style={styles.overallValue}>₹{totalSellValue.toLocaleString()}</Text>
+          <Text style={styles.overallValue}>{formatINR(totalSellValue)}</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Avg Sell Rate</Text>
-          <Text style={styles.overallValue}>₹{stats.avgSellRate.toFixed(2)}</Text>
+          <Text style={styles.overallValue}>{INR_SYMBOL}{stats.avgSellRate.toFixed(2)}</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Total Profit</Text>
-          <Text style={[styles.overallValue, { color: Colors.accent, fontWeight: '800' as const }]}>₹{stats.totalProfit.toLocaleString()}</Text>
+          <Text style={[styles.overallValue, { color: Colors.accent, fontWeight: '800' as const }]}>{formatINR(stats.totalProfit)}</Text>
         </View>
         <View style={styles.overallDivider} />
         <View style={styles.overallRow}>
           <Text style={styles.overallLabel}>Balance Volume</Text>
-          <Text style={styles.overallValue}>{stats.balanceVolume.toLocaleString()} USDT</Text>
+          <Text style={styles.overallValue}>{USDT_SYMBOL}{stats.balanceVolume.toLocaleString()} USDT</Text>
         </View>
       </View>
 
@@ -243,7 +244,7 @@ export default function InsightsScreen() {
       <View style={styles.bankingSummaryRow}>
         <View style={[styles.bankingCard, { borderLeftColor: Colors.deposit }]}>
           <Landmark size={20} color={Colors.deposit} />
-          <Text style={styles.bankingCardValue}>₹{stats.totalDeposited.toLocaleString()}</Text>
+          <Text style={styles.bankingCardValue}>{formatINR(stats.totalDeposited)}</Text>
           <Text style={styles.bankingCardLabel}>Total Deposited</Text>
           <View style={styles.bankingCardMeta}>
             <Text style={styles.bankingMetaText}>{deposits.length} entries</Text>
@@ -251,7 +252,7 @@ export default function InsightsScreen() {
         </View>
         <View style={[styles.bankingCard, { borderLeftColor: Colors.withdraw }]}>
           <Banknote size={20} color={Colors.withdraw} />
-          <Text style={styles.bankingCardValue}>₹{stats.totalWithdrawn.toLocaleString()}</Text>
+          <Text style={styles.bankingCardValue}>{formatINR(stats.totalWithdrawn)}</Text>
           <Text style={styles.bankingCardLabel}>Total Withdrawn</Text>
           <View style={styles.bankingCardMeta}>
             <Text style={styles.bankingMetaText}>{withdrawals.length} entries</Text>
@@ -265,20 +266,20 @@ export default function InsightsScreen() {
           <Text style={styles.netFundsTitle}>Net Bank Funds</Text>
         </View>
         <Text style={[styles.netFundsValue, { color: stats.netBankFunds >= 0 ? Colors.accent : Colors.danger }]}>
-          ₹{stats.netBankFunds.toLocaleString()}
+          {formatINR(stats.netBankFunds)}
         </Text>
         <View style={styles.netFundsDetails}>
           <View style={styles.netFundsRow}>
             <Text style={styles.netFundsLabel}>Verified Deposits</Text>
-            <Text style={styles.netFundsDetailValue}>₹{bankingStats.verifiedAmount.toLocaleString()} ({bankingStats.verifiedCount})</Text>
+            <Text style={styles.netFundsDetailValue}>{formatINR(bankingStats.verifiedAmount)} ({bankingStats.verifiedCount})</Text>
           </View>
           <View style={styles.netFundsRow}>
             <Text style={[styles.netFundsLabel, { color: Colors.warning }]}>Unverified Deposits</Text>
-            <Text style={styles.netFundsDetailValue}>₹{bankingStats.unverifiedAmount.toLocaleString()} ({bankingStats.unverifiedCount})</Text>
+            <Text style={styles.netFundsDetailValue}>{formatINR(bankingStats.unverifiedAmount)} ({bankingStats.unverifiedCount})</Text>
           </View>
           <View style={styles.netFundsRow}>
             <Text style={styles.netFundsLabel}>Linked Withdrawals</Text>
-            <Text style={styles.netFundsDetailValue}>₹{bankingStats.linkedAmount.toLocaleString()} ({bankingStats.linkedCount})</Text>
+            <Text style={styles.netFundsDetailValue}>{formatINR(bankingStats.linkedAmount)} ({bankingStats.linkedCount})</Text>
           </View>
           <View style={styles.netFundsRow}>
             <Text style={styles.netFundsLabel}>Unlinked Withdrawals</Text>
@@ -297,7 +298,7 @@ export default function InsightsScreen() {
                 <View style={styles.modeBarTrack}>
                   <View style={[styles.modeBarFill, { width: `${(amount / maxDepMode) * 100}%`, backgroundColor: Colors.deposit }]} />
                 </View>
-                <Text style={styles.modeValue}>₹{amount.toLocaleString()}</Text>
+                <Text style={styles.modeValue}>{formatINR(amount)}</Text>
               </View>
             ))}
           </View>
@@ -314,7 +315,7 @@ export default function InsightsScreen() {
                 <View style={styles.modeBarTrack}>
                   <View style={[styles.modeBarFill, { width: `${(amount / maxWthMode) * 100}%`, backgroundColor: Colors.withdraw }]} />
                 </View>
-                <Text style={styles.modeValue}>₹{amount.toLocaleString()}</Text>
+                <Text style={styles.modeValue}>{formatINR(amount)}</Text>
               </View>
             ))}
           </View>
@@ -330,9 +331,9 @@ export default function InsightsScreen() {
             <View style={styles.supplierHeader}>
               <Text style={styles.supplierName}>{s.name}</Text>
               <View style={styles.rateCompare}>
-                <Text style={[styles.rateText, { color: Colors.buy }]}>₹{s.avgBuyRate.toFixed(2)}</Text>
+                <Text style={[styles.rateText, { color: Colors.buy }]}>{INR_SYMBOL}{s.avgBuyRate.toFixed(2)}</Text>
                 <ArrowRight size={12} color={Colors.textMuted} />
-                <Text style={[styles.rateText, { color: Colors.sell }]}>₹{s.avgSellRate.toFixed(2)}</Text>
+                <Text style={[styles.rateText, { color: Colors.sell }]}>{INR_SYMBOL}{s.avgSellRate.toFixed(2)}</Text>
               </View>
             </View>
             <View style={styles.barRow}>
@@ -353,7 +354,7 @@ export default function InsightsScreen() {
               <View style={styles.priceDiffRow}>
                 <Text style={styles.priceDiffLabel}>Price Difference</Text>
                 <Text style={[styles.priceDiffValue, { color: s.avgSellRate > s.avgBuyRate ? Colors.accent : Colors.danger }]}>
-                  ₹{(s.avgSellRate - s.avgBuyRate).toFixed(2)} per USDT
+                  {INR_SYMBOL}{(s.avgSellRate - s.avgBuyRate).toFixed(2)} per USDT
                 </Text>
               </View>
             )}

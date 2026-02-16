@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAv
 import { Search, Plus, X, MapPin, Wallet, Calendar, ChevronRight, Trash2, Edit3, CheckCircle } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateId } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -29,7 +30,7 @@ export default function ClientsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const depositOptions = useMemo(() =>
-    deposits.map(d => ({ label: `${d.code} (₹${d.amount.toLocaleString()})`, value: d.code })),
+    deposits.map(d => ({ label: `${d.code} (${formatINR(d.amount)})`, value: d.code })),
     [deposits]
   );
 
@@ -135,12 +136,7 @@ export default function ClientsScreen() {
     ]);
   }, [deleteClient, addHistoryEntry, currentUser]);
 
-  const formatCurrency = (num: number) => {
-    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
-    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
-    if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
-    return `₹${num.toLocaleString()}`;
-  };
+  const formatCurrency = (num: number) => formatINR(num, true);
 
   if (success) {
     return (
@@ -181,10 +177,10 @@ export default function ClientsScreen() {
 
             <FormInput label="Name *" value={name} onChangeText={setName} placeholder="Client full name" testID="cli-name" />
             <FormInput label="City" value={city} onChangeText={setCity} placeholder="e.g. Mumbai" testID="cli-city" />
-            <FormInput label="Contract Fund (₹)" value={contractFund} onChangeText={setContractFund} placeholder="e.g. 1000000" keyboardType="numeric" testID="cli-fund" />
+            <FormInput label={`Contract Fund (${INR_SYMBOL})`} value={contractFund} onChangeText={setContractFund} placeholder="e.g. 1000000" keyboardType="numeric" testID="cli-fund" />
             <Dropdown label="Deposit UID" value={depositUID} options={depositOptions} onSelect={setDepositUID} placeholder="Link to bank deposit" />
-            <FormInput label="Trading Fund (₹)" value={tradingFund} onChangeText={setTradingFund} placeholder="e.g. 500000" keyboardType="numeric" testID="cli-trading" />
-            <FormInput label="Dividends Amount (₹)" value={dividendsAmt} onChangeText={setDividendsAmt} placeholder="e.g. 15000" keyboardType="numeric" testID="cli-div" />
+            <FormInput label={`Trading Fund (${INR_SYMBOL})`} value={tradingFund} onChangeText={setTradingFund} placeholder="e.g. 500000" keyboardType="numeric" testID="cli-trading" />
+            <FormInput label={`Dividends Amount (${INR_SYMBOL})`} value={dividendsAmt} onChangeText={setDividendsAmt} placeholder="e.g. 15000" keyboardType="numeric" testID="cli-div" />
             <Dropdown label="Due Date Frequency" value={dueFrequency} options={freqOptions} onSelect={setDueFrequency} placeholder="Select frequency" />
             <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Additional notes..." multiline testID="cli-remarks" />
           </View>

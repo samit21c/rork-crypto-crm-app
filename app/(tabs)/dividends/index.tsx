@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAv
 import { Search, Plus, X, Trash2, Edit3, CheckCircle, Clock, AlertCircle, CircleDot } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
+import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateId } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
@@ -223,12 +224,12 @@ export default function DividendsScreen() {
 
             {selectedClient && (
               <View style={styles.clientPreview}>
-                <Text style={styles.previewLabel}>Contract: ₹{selectedClient.contractFund.toLocaleString()}</Text>
-                <Text style={styles.previewLabel}>Dividend Rate: ₹{selectedClient.dividendsAmt.toLocaleString()} / {selectedClient.dueFrequency}</Text>
+                <Text style={styles.previewLabel}>Contract: {formatINR(selectedClient.contractFund)}</Text>
+                <Text style={styles.previewLabel}>Dividend Rate: {formatINR(selectedClient.dividendsAmt)} / {selectedClient.dueFrequency}</Text>
               </View>
             )}
 
-            <FormInput label="Paid Amount (₹)" value={paidAmount} onChangeText={setPaidAmount} placeholder="e.g. 15000" keyboardType="numeric" testID="div-paid" />
+            <FormInput label={`Paid Amount (${INR_SYMBOL})`} value={paidAmount} onChangeText={setPaidAmount} placeholder="e.g. 15000" keyboardType="numeric" testID="div-paid" />
             <Dropdown label="Assign Bank" value={assignedBankId} options={bankOptions} onSelect={setAssignedBankId} placeholder="Select company bank" />
             <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Additional notes..." multiline testID="div-remarks" />
           </View>
@@ -295,7 +296,7 @@ export default function DividendsScreen() {
                   </View>
                 </View>
                 <View style={styles.divAmtWrap}>
-                  <Text style={styles.divAmount}>₹{div.paidAmount.toLocaleString()}</Text>
+                  <Text style={styles.divAmount}>{formatINR(div.paidAmount)}</Text>
                   <Text style={styles.divAmtLabel}>Paid</Text>
                 </View>
               </View>
@@ -309,7 +310,7 @@ export default function DividendsScreen() {
                 </View>
                 <View style={styles.divDetail}>
                   <Text style={styles.detailLabel}>Total Paid</Text>
-                  <Text style={styles.detailValue}>₹{div.totalPaid.toLocaleString()}</Text>
+                  <Text style={styles.detailValue}>{formatINR(div.totalPaid)}</Text>
                 </View>
                 <View style={styles.divDetail}>
                   <Text style={styles.detailLabel}>Next Due</Text>
