@@ -29,6 +29,8 @@ function RootLayoutNav() {
       <Stack.Screen name="admin" options={{ presentation: "modal", title: "Admin Panel" }} />
       <Stack.Screen name="suppliers" options={{ presentation: "modal", title: "Suppliers" }} />
       <Stack.Screen name="insights" options={{ presentation: "modal", title: "Trading Insights" }} />
+      <Stack.Screen name="company-banks" options={{ presentation: "modal", title: "Company Banks" }} />
+      <Stack.Screen name="histories" options={{ presentation: "modal", title: "Audit History" }} />
       <Stack.Screen name="transaction-detail" options={{ title: "Transaction Details" }} />
     </Stack>
   );

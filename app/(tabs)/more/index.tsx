@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, BarChart3, Shield, User, LogOut, ChevronRight } from 'lucide-react-native';
+import { Users, BarChart3, Shield, User, LogOut, ChevronRight, Building2, Clock, Landmark, Banknote, FileText } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -11,12 +11,17 @@ export default function MoreScreen() {
 
   const handleLogout = () => {
     logout();
-    router.replace('/login');
+    router.replace('/login' as any);
   };
 
   const menuItems = [
+    { label: 'Deposits', sublabel: 'Bank deposit entries', icon: Landmark, color: Colors.deposit, bg: Colors.depositLight, route: '/deposits' as const },
+    { label: 'Withdrawals', sublabel: 'Bank withdrawal entries', icon: Banknote, color: Colors.withdraw, bg: Colors.withdrawLight, route: '/withdrawals' as const },
+    { label: 'Transactions', sublabel: 'Buy & sell history', icon: FileText, color: Colors.textSecondary, bg: Colors.surface, route: '/transactions' as const },
+    { label: 'Company Banks', sublabel: 'Manage bank accounts', icon: Building2, color: Colors.bank, bg: Colors.bankLight, route: '/company-banks' as const },
     { label: 'Suppliers', sublabel: 'Manage your suppliers', icon: Users, color: Colors.warning, bg: Colors.warningLight, route: '/suppliers' as const },
     { label: 'Trading Insights', sublabel: 'Analytics & summaries', icon: BarChart3, color: Colors.accent, bg: Colors.accentLight, route: '/insights' as const },
+    { label: 'Audit History', sublabel: 'All changes & logs', icon: Clock, color: Colors.history, bg: Colors.historyLight, route: '/histories' as const },
     ...(isAdmin ? [{ label: 'Admin Panel', sublabel: 'Manage team members', icon: Shield, color: Colors.info, bg: Colors.infoLight, route: '/admin' as const }] : []),
     { label: 'Profile', sublabel: 'Account settings', icon: User, color: Colors.textSecondary, bg: Colors.surface, route: '/profile' as const },
   ];
@@ -41,7 +46,7 @@ export default function MoreScreen() {
           <TouchableOpacity
             key={item.label}
             style={[styles.menuItem, index < menuItems.length - 1 && styles.menuBorder]}
-            onPress={() => router.push(item.route)}
+            onPress={() => router.push(item.route as any)}
             activeOpacity={0.7}
           >
             <View style={[styles.menuIcon, { backgroundColor: item.bg }]}>

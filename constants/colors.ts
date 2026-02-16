@@ -31,4 +31,12 @@ export default {
   depositLight: '#EDE9FE',
   withdraw: '#F97316',
   withdrawLight: '#FFF7ED',
+  client: '#0EA5E9',
+  clientLight: '#E0F2FE',
+  bank: '#6366F1',
+  bankLight: '#EEF2FF',
+  dividend: '#EC4899',
+  dividendLight: '#FCE7F3',
+  history: '#64748B',
+  historyLight: '#F1F5F9',
 };

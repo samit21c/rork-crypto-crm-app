@@ -11,7 +11,7 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     logout();
-    router.replace('/login');
+    router.replace('/login' as any);
   };
 
   const joined = currentUser?.createdAt

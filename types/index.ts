@@ -78,6 +78,67 @@ export interface BankWithdrawal {
   createdBy: string;
 }
 
+export type DueFrequency = 'Daily' | 'Weekly' | 'Monthly' | 'Specific Date';
+
+export interface Client {
+  id: string;
+  name: string;
+  city: string;
+  contractFund: number;
+  depositUID?: string;
+  tradingFund: number;
+  dividendsAmt: number;
+  dueFrequency: DueFrequency;
+  specificDueDate?: string;
+  remarks: string;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface CompanyBank {
+  id: string;
+  bankName: string;
+  city: string;
+  accountNo: string;
+  ifsc: string;
+  closingBalance: number;
+  lastBalanceUpdate: string;
+  createdAt: string;
+  createdBy: string;
+}
+
+export type DividendStatus = 'Pending' | 'Paid' | 'Overdue';
+
+export interface Dividend {
+  id: string;
+  clientId: string;
+  dueDate: string;
+  paidAmount: number;
+  totalPaid: number;
+  nextDueDate: string;
+  assignedBankId?: string;
+  status: DividendStatus;
+  remarks: string;
+  createdAt: string;
+  createdBy: string;
+}
+
+export type HistoryAction = 'Create' | 'Update' | 'Delete';
+export type HistorySection = 'Client' | 'CompanyBank' | 'Deposit' | 'Withdrawal' | 'BuyTrade' | 'SellTrade' | 'Dividend' | 'Supplier';
+
+export interface HistoryEntry {
+  id: string;
+  section: HistorySection;
+  action: HistoryAction;
+  entityId: string;
+  entityLabel: string;
+  userId: string;
+  userName: string;
+  before?: string;
+  after?: string;
+  timestamp: string;
+}
+
 export interface DashboardStats {
   totalBuyVolume: number;
   totalSellVolume: number;
@@ -91,4 +152,9 @@ export interface DashboardStats {
   totalDeposited: number;
   totalWithdrawn: number;
   netBankFunds: number;
+  totalClients: number;
+  totalContractFunds: number;
+  totalDividendsPaid: number;
+  pendingDividends: number;
+  totalBankBalance: number;
 }

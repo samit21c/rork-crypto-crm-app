@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { TrendingUp, TrendingDown, DollarSign, ArrowRight, Landmark, Banknote, ArrowDownUp } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, DollarSign, ArrowRight, Landmark, Banknote, ArrowDownUp, UserCheck, Heart, Building2, AlertCircle } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useData } from '@/contexts/DataContext';
 
 export default function InsightsScreen() {
-  const { buyTransactions, sellTransactions, deposits, withdrawals, stats, getSupplierName } = useData();
+  const { buyTransactions, sellTransactions, deposits, withdrawals, clients, companyBanks, dividends, stats, getSupplierName, getClientName } = useData();
 
   const supplierStats = useMemo(() => {
     const map = new Map<string, { buyVol: number; sellVol: number; buyVal: number; sellVal: number }>();
@@ -50,16 +50,10 @@ export default function InsightsScreen() {
     const unlinkedWithdrawals = withdrawals.filter(w => !w.depositCode);
 
     const depositByMode = new Map<string, number>();
-    deposits.forEach(d => {
-      depositByMode.set(d.mode, (depositByMode.get(d.mode) ?? 0) + d.amount);
-    });
+    deposits.forEach(d => { depositByMode.set(d.mode, (depositByMode.get(d.mode) ?? 0) + d.amount); });
 
     const withdrawByMode = new Map<string, number>();
-    withdrawals.forEach(w => {
-      withdrawByMode.set(w.mode, (withdrawByMode.get(w.mode) ?? 0) + w.amount);
-    });
-
-    const profitAdjusted = stats.totalProfit - (stats.totalWithdrawn * 0);
+    withdrawals.forEach(w => { withdrawByMode.set(w.mode, (withdrawByMode.get(w.mode) ?? 0) + w.amount); });
 
     return {
       verifiedCount: verifiedDeposits.length,
@@ -71,12 +65,33 @@ export default function InsightsScreen() {
       linkedAmount: linkedWithdrawals.reduce((s, w) => s + w.amount, 0),
       depositByMode: Array.from(depositByMode.entries()),
       withdrawByMode: Array.from(withdrawByMode.entries()),
-      profitAdjusted,
     };
-  }, [deposits, withdrawals, stats]);
+  }, [deposits, withdrawals]);
+
+  const clientInsights = useMemo(() => {
+    return clients.map(client => {
+      const clientDivs = dividends.filter(d => d.clientId === client.id);
+      const totalPaid = clientDivs.filter(d => d.status === 'Paid').reduce((s, d) => s + d.paidAmount, 0);
+      const roi = client.contractFund > 0 ? (totalPaid / client.contractFund) * 100 : 0;
+      return { ...client, totalDivPaid: totalPaid, roi };
+    }).sort((a, b) => b.contractFund - a.contractFund);
+  }, [clients, dividends]);
+
+  const dividendStats = useMemo(() => {
+    const paid = dividends.filter(d => d.status === 'Paid');
+    const pending = dividends.filter(d => d.status === 'Pending');
+    const overdue = dividends.filter(d => d.status === 'Overdue');
+    return {
+      paidCount: paid.length,
+      paidAmount: paid.reduce((s, d) => s + d.paidAmount, 0),
+      pendingCount: pending.length,
+      overdueCount: overdue.length,
+    };
+  }, [dividends]);
 
   const maxDepMode = Math.max(...bankingStats.depositByMode.map(([, v]) => v), 1);
   const maxWthMode = Math.max(...bankingStats.withdrawByMode.map(([, v]) => v), 1);
+  const maxClientFund = Math.max(...clientInsights.map(c => c.contractFund), 1);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -98,6 +113,88 @@ export default function InsightsScreen() {
           <Text style={[styles.todayLabel, { color: Colors.accent }]}>Profit</Text>
         </View>
       </View>
+
+      <Text style={styles.sectionTitle}>Clients & Investments</Text>
+      <View style={styles.clientStatsRow}>
+        <View style={[styles.miniStatCard, { borderLeftColor: Colors.client }]}>
+          <UserCheck size={18} color={Colors.client} />
+          <Text style={styles.miniStatValue}>{stats.totalClients}</Text>
+          <Text style={styles.miniStatLabel}>Total Clients</Text>
+        </View>
+        <View style={[styles.miniStatCard, { borderLeftColor: Colors.accent }]}>
+          <DollarSign size={18} color={Colors.accent} />
+          <Text style={styles.miniStatValue}>₹{(stats.totalContractFunds / 100000).toFixed(1)}L</Text>
+          <Text style={styles.miniStatLabel}>Contract Funds</Text>
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Dividend Summary</Text>
+      <View style={styles.dividendStatsRow}>
+        <View style={[styles.dividendCard, { backgroundColor: Colors.accentLight }]}>
+          <Text style={[styles.dividendCardValue, { color: Colors.accent }]}>₹{dividendStats.paidAmount.toLocaleString()}</Text>
+          <Text style={styles.dividendCardLabel}>{dividendStats.paidCount} Paid</Text>
+        </View>
+        <View style={[styles.dividendCard, { backgroundColor: Colors.warningLight }]}>
+          <Text style={[styles.dividendCardValue, { color: Colors.warning }]}>{dividendStats.pendingCount}</Text>
+          <Text style={styles.dividendCardLabel}>Pending</Text>
+        </View>
+        <View style={[styles.dividendCard, { backgroundColor: Colors.dangerLight }]}>
+          <Text style={[styles.dividendCardValue, { color: Colors.danger }]}>{dividendStats.overdueCount}</Text>
+          <Text style={styles.dividendCardLabel}>Overdue</Text>
+        </View>
+      </View>
+
+      {clientInsights.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>ROI by Client</Text>
+          <View style={styles.overallCard}>
+            {clientInsights.map((client, i) => (
+              <View key={client.id}>
+                <View style={styles.clientROIRow}>
+                  <View style={styles.clientROIInfo}>
+                    <Text style={styles.clientROIName}>{client.name}</Text>
+                    <Text style={styles.clientROICity}>{client.city || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.clientROIRight}>
+                    <Text style={styles.clientROIValue}>{client.roi.toFixed(1)}%</Text>
+                    <Text style={styles.clientROIPaid}>₹{client.totalDivPaid.toLocaleString()} paid</Text>
+                  </View>
+                </View>
+                <View style={styles.clientBarTrack}>
+                  <View style={[styles.clientBarFill, { width: `${(client.contractFund / maxClientFund) * 100}%`, backgroundColor: Colors.client }]} />
+                </View>
+                {i < clientInsights.length - 1 && <View style={styles.overallDivider} />}
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+
+      <Text style={styles.sectionTitle}>Company Bank Balances</Text>
+      {companyBanks.length === 0 ? (
+        <View style={styles.emptyState}><Text style={styles.emptyText}>No banks added</Text></View>
+      ) : (
+        <View style={styles.overallCard}>
+          {companyBanks.map((bank, i) => (
+            <View key={bank.id}>
+              <View style={styles.bankROIRow}>
+                <Building2 size={16} color={Colors.bank} />
+                <View style={styles.bankROIInfo}>
+                  <Text style={styles.bankROIName}>{bank.bankName}</Text>
+                  <Text style={styles.bankROICity}>{bank.city}</Text>
+                </View>
+                <Text style={styles.bankROIBal}>₹{bank.closingBalance.toLocaleString()}</Text>
+              </View>
+              {i < companyBanks.length - 1 && <View style={styles.overallDivider} />}
+            </View>
+          ))}
+          <View style={styles.overallDivider} />
+          <View style={styles.bankTotalRow}>
+            <Text style={styles.bankTotalLabel}>Total Balance</Text>
+            <Text style={styles.bankTotalValue}>₹{stats.totalBankBalance.toLocaleString()}</Text>
+          </View>
+        </View>
+      )}
 
       <Text style={styles.sectionTitle}>Overall Trading Stats</Text>
       <View style={styles.overallCard}>
@@ -196,9 +293,7 @@ export default function InsightsScreen() {
           <View style={styles.modeCard}>
             {bankingStats.depositByMode.map(([mode, amount]) => (
               <View key={mode} style={styles.modeRow}>
-                <View style={styles.modeLabel}>
-                  <Text style={styles.modeLabelText}>{mode}</Text>
-                </View>
+                <View style={styles.modeLabel}><Text style={styles.modeLabelText}>{mode}</Text></View>
                 <View style={styles.modeBarTrack}>
                   <View style={[styles.modeBarFill, { width: `${(amount / maxDepMode) * 100}%`, backgroundColor: Colors.deposit }]} />
                 </View>
@@ -215,9 +310,7 @@ export default function InsightsScreen() {
           <View style={styles.modeCard}>
             {bankingStats.withdrawByMode.map(([mode, amount]) => (
               <View key={mode} style={styles.modeRow}>
-                <View style={styles.modeLabel}>
-                  <Text style={styles.modeLabelText}>{mode}</Text>
-                </View>
+                <View style={styles.modeLabel}><Text style={styles.modeLabelText}>{mode}</Text></View>
                 <View style={styles.modeBarTrack}>
                   <View style={[styles.modeBarFill, { width: `${(amount / maxWthMode) * 100}%`, backgroundColor: Colors.withdraw }]} />
                 </View>
@@ -230,9 +323,7 @@ export default function InsightsScreen() {
 
       <Text style={styles.sectionTitle}>Supplier-wise Breakdown</Text>
       {supplierStats.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No data available</Text>
-        </View>
+        <View style={styles.emptyState}><Text style={styles.emptyText}>No data available</Text></View>
       ) : (
         supplierStats.map((s, i) => (
           <View key={i} style={styles.supplierCard}>
@@ -245,18 +336,14 @@ export default function InsightsScreen() {
               </View>
             </View>
             <View style={styles.barRow}>
-              <View style={styles.barLabel}>
-                <Text style={styles.barLabelText}>Buy</Text>
-              </View>
+              <View style={styles.barLabel}><Text style={styles.barLabelText}>Buy</Text></View>
               <View style={styles.barTrack}>
                 <View style={[styles.barFill, { width: `${(s.buyVol / maxBuyVol) * 100}%`, backgroundColor: Colors.buy }]} />
               </View>
               <Text style={styles.barValue}>{s.buyVol.toLocaleString()}</Text>
             </View>
             <View style={styles.barRow}>
-              <View style={styles.barLabel}>
-                <Text style={styles.barLabelText}>Sell</Text>
-              </View>
+              <View style={styles.barLabel}><Text style={styles.barLabelText}>Sell</Text></View>
               <View style={styles.barTrack}>
                 <View style={[styles.barFill, { width: `${(s.sellVol / maxBuyVol) * 100}%`, backgroundColor: Colors.sell }]} />
               </View>
@@ -284,62 +371,61 @@ const styles = StyleSheet.create({
   content: { padding: 20 },
   sectionTitle: { fontSize: 17, fontWeight: '700' as const, color: Colors.text, marginBottom: 12, marginTop: 8 },
   todayRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
-  todayCard: {
-    flex: 1,
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-  },
+  todayCard: { flex: 1, borderRadius: 14, padding: 14, alignItems: 'center' },
   todayValue: { fontSize: 18, fontWeight: '700' as const, marginTop: 6 },
   todayLabel: { fontSize: 11, fontWeight: '600' as const, marginTop: 2 },
+  clientStatsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  miniStatCard: {
+    flex: 1, backgroundColor: Colors.card, borderRadius: 16, padding: 16, borderLeftWidth: 4,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    borderWidth: 1, borderColor: Colors.borderLight,
+  },
+  miniStatValue: { fontSize: 20, fontWeight: '800' as const, color: Colors.text, marginTop: 8 },
+  miniStatLabel: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  dividendStatsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
+  dividendCard: { flex: 1, borderRadius: 14, padding: 14, alignItems: 'center' },
+  dividendCardValue: { fontSize: 18, fontWeight: '800' as const },
+  dividendCardLabel: { fontSize: 11, fontWeight: '600' as const, color: Colors.textSecondary, marginTop: 4 },
   overallCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    backgroundColor: Colors.card, borderRadius: 18, padding: 16, marginBottom: 8,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    borderWidth: 1, borderColor: Colors.borderLight,
   },
   overallRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
   overallLabel: { fontSize: 14, color: Colors.textSecondary },
   overallValue: { fontSize: 15, fontWeight: '700' as const, color: Colors.text },
   overallDivider: { height: 1, backgroundColor: Colors.borderLight },
+  clientROIRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  clientROIInfo: { flex: 1 },
+  clientROIName: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
+  clientROICity: { fontSize: 11, color: Colors.textMuted },
+  clientROIRight: { alignItems: 'flex-end' },
+  clientROIValue: { fontSize: 16, fontWeight: '800' as const, color: Colors.client },
+  clientROIPaid: { fontSize: 11, color: Colors.textMuted },
+  clientBarTrack: { height: 6, backgroundColor: Colors.surface, borderRadius: 3, overflow: 'hidden', marginBottom: 4 },
+  clientBarFill: { height: 6, borderRadius: 3 },
+  bankROIRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 10 },
+  bankROIInfo: { flex: 1 },
+  bankROIName: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
+  bankROICity: { fontSize: 11, color: Colors.textMuted },
+  bankROIBal: { fontSize: 15, fontWeight: '700' as const, color: Colors.bank },
+  bankTotalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
+  bankTotalLabel: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
+  bankTotalValue: { fontSize: 17, fontWeight: '800' as const, color: Colors.bank },
   bankingSummaryRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
   bankingCard: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    borderLeftWidth: 4,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    flex: 1, backgroundColor: Colors.card, borderRadius: 16, padding: 16, borderLeftWidth: 4,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    borderWidth: 1, borderColor: Colors.borderLight,
   },
   bankingCardValue: { fontSize: 18, fontWeight: '800' as const, color: Colors.text, marginTop: 10 },
   bankingCardLabel: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
   bankingCardMeta: { marginTop: 8 },
   bankingMetaText: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' as const },
   netFundsCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 8,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    backgroundColor: Colors.card, borderRadius: 18, padding: 18, marginBottom: 8,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    borderWidth: 1, borderColor: Colors.borderLight,
   },
   netFundsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   netFundsTitle: { fontSize: 15, fontWeight: '700' as const, color: Colors.text },
@@ -349,17 +435,9 @@ const styles = StyleSheet.create({
   netFundsLabel: { fontSize: 13, color: Colors.textSecondary },
   netFundsDetailValue: { fontSize: 13, fontWeight: '600' as const, color: Colors.text },
   modeCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    backgroundColor: Colors.card, borderRadius: 16, padding: 16, marginBottom: 8,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    borderWidth: 1, borderColor: Colors.borderLight,
   },
   modeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   modeLabel: { width: 70 },
@@ -368,17 +446,9 @@ const styles = StyleSheet.create({
   modeBarFill: { height: 10, borderRadius: 5 },
   modeValue: { fontSize: 12, fontWeight: '700' as const, color: Colors.text, width: 80, textAlign: 'right' as const },
   supplierCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    backgroundColor: Colors.card, borderRadius: 16, padding: 16, marginBottom: 10,
+    shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    borderWidth: 1, borderColor: Colors.borderLight,
   },
   supplierHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   supplierName: { fontSize: 15, fontWeight: '600' as const, color: Colors.text },

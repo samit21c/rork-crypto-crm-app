@@ -62,7 +62,7 @@ export default function TransactionsScreen() {
         <TransactionCard
           transaction={item}
           supplierName={getSupplierName(item.supplierId)}
-          onPress={() => router.push({ pathname: '/transaction-detail', params: { id: item.id, type: item.type } })}
+          onPress={() => router.push({ pathname: '/transaction-detail' as any, params: { id: item.id, type: item.type } })}
         />
       </View>
       <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item)}>

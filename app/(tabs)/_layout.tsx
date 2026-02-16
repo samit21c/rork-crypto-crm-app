@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, Landmark, Banknote, FileText, Menu } from 'lucide-react-native';
+import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, UserCheck, Heart, Menu } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -10,7 +10,7 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (isReady && !currentUser) {
-      router.replace('/login');
+      router.replace('/login' as any);
     }
   }, [isReady, currentUser, router]);
 
@@ -57,24 +57,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="deposits"
+        name="clients"
         options={{
-          title: 'Deposits',
-          tabBarIcon: ({ color, size }) => <Landmark size={size} color={color} />,
+          title: 'Clients',
+          tabBarIcon: ({ color, size }) => <UserCheck size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="withdrawals"
+        name="dividends"
         options={{
-          title: 'Withdraw',
-          tabBarIcon: ({ color, size }) => <Banknote size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="transactions"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
+          title: 'Dividends',
+          tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -84,6 +77,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Menu size={size} color={color} />,
         }}
       />
+      <Tabs.Screen name="deposits" options={{ href: null }} />
+      <Tabs.Screen name="withdrawals" options={{ href: null }} />
+      <Tabs.Screen name="transactions" options={{ href: null }} />
     </Tabs>
   );
 }
