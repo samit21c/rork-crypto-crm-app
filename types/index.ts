@@ -34,6 +34,8 @@ export interface SellTransaction {
   id: string;
   type: 'sell';
   accountCHZbit: string;
+  clientId?: string;
+  buyTransactionId?: string;
   receiverName: string;
   volume: number;
   rate: number;

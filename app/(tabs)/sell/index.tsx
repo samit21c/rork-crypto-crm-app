@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
-import { Image as ImageIcon, CheckCircle } from 'lucide-react-native';
+import { Image as ImageIcon, CheckCircle, Link2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
@@ -11,8 +11,11 @@ import { SellTransaction } from '@/types';
 
 export default function SellScreen() {
   const { currentUser } = useAuth();
-  const { suppliers, addSell, buyTransactions, sellTransactions } = useData();
+  const { suppliers, clients, addSell, buyTransactions, sellTransactions } = useData();
+
+  const [clientId, setClientId] = useState('');
   const [accountCHZbit, setAccountCHZbit] = useState('');
+  const [buyTransactionId, setBuyTransactionId] = useState('');
   const [receiverName, setReceiverName] = useState('');
   const [volume, setVolume] = useState('');
   const [rate, setRate] = useState('');
@@ -24,7 +27,57 @@ export default function SellScreen() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const supplierOptions = suppliers.map(s => ({ label: s.name, value: s.id }));
+  const clientOptions = useMemo(() =>
+    clients.map(c => ({ label: `${c.name} — ₹${c.contractFund.toLocaleString()}`, value: c.id })),
+    [clients]
+  );
+
+  const buyTxOptions = useMemo(() =>
+    buyTransactions.map(t => {
+      const supplier = suppliers.find(s => s.id === t.supplierId);
+      const supplierLabel = supplier ? ` · ${supplier.name}` : '';
+      return {
+        label: `${t.volume} USDT @ ₹${t.rate} — ${t.senderName}${supplierLabel}`,
+        value: t.id,
+      };
+    }),
+    [buyTransactions, suppliers]
+  );
+
+  const supplierOptions = useMemo(() =>
+    suppliers.map(s => ({ label: s.name, value: s.id })),
+    [suppliers]
+  );
+
+  const selectedClient = useMemo(() =>
+    clients.find(c => c.id === clientId),
+    [clients, clientId]
+  );
+
+  const selectedBuyTx = useMemo(() =>
+    buyTransactions.find(t => t.id === buyTransactionId),
+    [buyTransactions, buyTransactionId]
+  );
+
+  const handleClientChange = useCallback((id: string) => {
+    setClientId(id);
+    const client = clients.find(c => c.id === id);
+    if (client) {
+      setAccountCHZbit(`CHZ-${client.id.replace('cli-', '').toUpperCase()}`);
+      setReceiverName(client.name);
+      console.log('[Sell] Client selected:', client.name, '→ CHZbit auto-set');
+    }
+  }, [clients]);
+
+  const handleBuyTxChange = useCallback((id: string) => {
+    setBuyTransactionId(id);
+    const tx = buyTransactions.find(t => t.id === id);
+    if (tx) {
+      setVolume(tx.volume.toString());
+      if (tx.supplierId) setSupplierId(tx.supplierId);
+      console.log('[Sell] Buy TX linked:', tx.id, '→ volume & supplier auto-set');
+    }
+  }, [buyTransactions]);
 
   const avgBuyRate = useMemo(() => {
     const totalValue = buyTransactions.reduce((sum, t) => sum + t.volume * t.rate, 0);
@@ -47,7 +100,9 @@ export default function SellScreen() {
   }, [totalBuyVol, totalSellVol, sellVolume]);
 
   const resetForm = useCallback(() => {
+    setClientId('');
     setAccountCHZbit('');
+    setBuyTransactionId('');
     setReceiverName('');
     setVolume('');
     setRate('');
@@ -80,6 +135,8 @@ export default function SellScreen() {
         id: `sell-${Date.now()}`,
         type: 'sell',
         accountCHZbit: accountCHZbit.trim(),
+        clientId: clientId || undefined,
+        buyTransactionId: buyTransactionId || undefined,
         receiverName: receiverName.trim(),
         volume: parseFloat(volume),
         rate: parseFloat(rate),
@@ -96,12 +153,13 @@ export default function SellScreen() {
       await addSell(tx);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSuccess(true);
+      console.log('[Sell] Transaction saved:', tx.id);
     } catch {
       Alert.alert('Error', 'Failed to save transaction');
     } finally {
       setSaving(false);
     }
-  }, [accountCHZbit, receiverName, volume, rate, sellVolume, traderName, supplierId, remarks, attachment, profitMargin, balanceVolume, currentUser, addSell]);
+  }, [accountCHZbit, clientId, buyTransactionId, receiverName, volume, rate, sellVolume, traderName, supplierId, remarks, attachment, profitMargin, balanceVolume, currentUser, addSell]);
 
   if (success) {
     return (
@@ -123,16 +181,87 @@ export default function SellScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.formCard}>
           <View style={styles.cardHeader}>
-            <View style={[styles.badge, { backgroundColor: Colors.sellLight }]}>
+            <View style={[styles.badge, { backgroundColor: Colors.sellLight }]}>  
               <Text style={[styles.badgeText, { color: Colors.sell }]}>SELL</Text>
             </View>
             <Text style={styles.cardTitle}>New Sell Entry</Text>
           </View>
 
-          <FormInput label="Account CHZbit" value={accountCHZbit} onChangeText={setAccountCHZbit} placeholder="e.g. CHZ-1234567" testID="sell-account" />
-          <FormInput label="Receiver Name" value={receiverName} onChangeText={setReceiverName} placeholder="Enter receiver name" testID="sell-receiver" />
+          <View style={styles.sectionLabel}>
+            <Link2 size={14} color={Colors.primary} />
+            <Text style={styles.sectionLabelText}>Client & Contract</Text>
+          </View>
+
+          <Dropdown
+            label="CHZbit Client Contract"
+            value={clientId}
+            options={clientOptions}
+            onSelect={handleClientChange}
+            placeholder="Select client (auto-fills contract)"
+          />
+
+          {selectedClient && (
+            <View style={styles.autoFillCard}>
+              <Text style={styles.autoFillLabel}>Contract Fund</Text>
+              <Text style={styles.autoFillValue}>₹{selectedClient.contractFund.toLocaleString()}</Text>
+              <Text style={styles.autoFillLabel}>CHZbit Account</Text>
+              <Text style={styles.autoFillValue}>{accountCHZbit}</Text>
+              {selectedClient.depositUID && (
+                <>
+                  <Text style={styles.autoFillLabel}>Deposit UID</Text>
+                  <Text style={styles.autoFillValue}>{selectedClient.depositUID}</Text>
+                </>
+              )}
+            </View>
+          )}
+
+          <FormInput label="Account CHZbit" value={accountCHZbit} onChangeText={setAccountCHZbit} placeholder="Auto-filled or enter manually" testID="sell-account" />
+
+          <View style={styles.divider} />
+
+          <View style={styles.sectionLabel}>
+            <Link2 size={14} color={Colors.primary} />
+            <Text style={styles.sectionLabelText}>Buy USDT & Supplier</Text>
+          </View>
+
+          <Dropdown
+            label="Buy USDT (Link Transaction)"
+            value={buyTransactionId}
+            options={buyTxOptions}
+            onSelect={handleBuyTxChange}
+            placeholder="Select buy transaction (optional)"
+          />
+
+          {selectedBuyTx && (
+            <View style={styles.autoFillCard}>
+              <View style={styles.autoFillRow}>
+                <View style={styles.autoFillCol}>
+                  <Text style={styles.autoFillLabel}>Volume</Text>
+                  <Text style={styles.autoFillValue}>{selectedBuyTx.volume.toLocaleString()} USDT</Text>
+                </View>
+                <View style={styles.autoFillCol}>
+                  <Text style={styles.autoFillLabel}>Buy Rate</Text>
+                  <Text style={styles.autoFillValue}>₹{selectedBuyTx.rate.toFixed(2)}</Text>
+                </View>
+              </View>
+              <Text style={styles.autoFillLabel}>Sender</Text>
+              <Text style={styles.autoFillValue}>{selectedBuyTx.senderName}</Text>
+            </View>
+          )}
+
+          <Dropdown label="Supplier" value={supplierId} options={supplierOptions} onSelect={setSupplierId} placeholder="Select supplier (optional)" />
+
+          <View style={styles.divider} />
+
+          <View style={styles.sectionLabel}>
+            <Link2 size={14} color={Colors.primary} />
+            <Text style={styles.sectionLabelText}>Trade Details</Text>
+          </View>
+
+          <FormInput label="Receiver Name" value={receiverName} onChangeText={setReceiverName} placeholder="Auto-filled or enter manually" testID="sell-receiver" />
+          <FormInput label="Trader Name" value={traderName} onChangeText={setTraderName} placeholder="Enter trader name" testID="sell-trader" />
           <FormInput label="Volume (USDT)" value={volume} onChangeText={setVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-volume" />
-          <FormInput label="Rate (₹)" value={rate} onChangeText={setRate} placeholder="e.g. 87.00" keyboardType="numeric" testID="sell-rate" />
+          <FormInput label="Selling Rate (₹)" value={rate} onChangeText={setRate} placeholder="e.g. 87.00" keyboardType="numeric" testID="sell-rate" />
           <FormInput label="Sell Volume (USDT)" value={sellVolume} onChangeText={setSellVolume} placeholder="e.g. 3000" keyboardType="numeric" testID="sell-sellvolume" />
 
           <View style={styles.calcRow}>
@@ -152,11 +281,9 @@ export default function SellScreen() {
           </View>
 
           <View style={styles.calcInfo}>
-            <Text style={styles.calcInfoText}>Avg Buy Rate: ₹{avgBuyRate.toFixed(2)} · Formula: (Rate - AvgBuyRate) × SellVolume</Text>
+            <Text style={styles.calcInfoText}>Avg Buy Rate: ₹{avgBuyRate.toFixed(2)} · Profit = (SellingRate - AvgBuyRate) × SellVolume</Text>
           </View>
 
-          <FormInput label="Trader Name" value={traderName} onChangeText={setTraderName} placeholder="Enter trader name" testID="sell-trader" />
-          <Dropdown label="Supplier" value={supplierId} options={supplierOptions} onSelect={setSupplierId} placeholder="Select supplier (optional)" />
           <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Add notes..." multiline testID="sell-remarks" />
 
           <TouchableOpacity style={styles.attachBtn} onPress={pickImage}>
@@ -205,6 +332,57 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 },
   badgeText: { fontSize: 11, fontWeight: '800' as const, letterSpacing: 0.5 },
   cardTitle: { fontSize: 18, fontWeight: '700' as const, color: Colors.text },
+  sectionLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    marginTop: 4,
+  },
+  sectionLabelText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: Colors.primary,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: 16,
+  },
+  autoFillCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
+  autoFillRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 6,
+  },
+  autoFillCol: {
+    flex: 1,
+  },
+  autoFillLabel: {
+    fontSize: 10,
+    fontWeight: '600' as const,
+    color: Colors.textMuted,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.3,
+    marginTop: 4,
+  },
+  autoFillValue: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.text,
+    marginBottom: 2,
+  },
   calcRow: { flexDirection: 'row', marginBottom: 16 },
   calcGap: { width: 12 },
   calcCard: {
