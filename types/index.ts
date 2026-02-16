@@ -125,8 +125,19 @@ export interface Dividend {
   createdBy: string;
 }
 
+export interface CashInHand {
+  id: string;
+  cashierName: string;
+  cashAmount: number;
+  clientAssign: string;
+  holdPurpose: string;
+  remarks: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 export type HistoryAction = 'Create' | 'Update' | 'Delete';
-export type HistorySection = 'Client' | 'CompanyBank' | 'Deposit' | 'Withdrawal' | 'BuyTrade' | 'SellTrade' | 'Dividend' | 'Supplier';
+export type HistorySection = 'Client' | 'CompanyBank' | 'Deposit' | 'Withdrawal' | 'BuyTrade' | 'SellTrade' | 'Dividend' | 'Supplier' | 'CashInHand';
 
 export interface HistoryEntry {
   id: string;

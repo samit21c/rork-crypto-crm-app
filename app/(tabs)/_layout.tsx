@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, UserCheck, Heart, Menu } from 'lucide-react-native';
+import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, UserCheck, Heart, Menu, HandCoins } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -77,6 +77,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Menu size={size} color={color} />,
         }}
       />
+      <Tabs.Screen name="cash-in-hand" options={{ href: null }} />
       <Tabs.Screen name="deposits" options={{ href: null }} />
       <Tabs.Screen name="withdrawals" options={{ href: null }} />
       <Tabs.Screen name="transactions" options={{ href: null }} />

@@ -39,4 +39,6 @@ export default {
   dividendLight: '#FCE7F3',
   history: '#64748B',
   historyLight: '#F1F5F9',
+  cash: '#D97706',
+  cashLight: '#FEF3C7',
 };

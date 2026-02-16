@@ -1,4 +1,4 @@
-import { User, Supplier, BuyTransaction, SellTransaction, BankDeposit, BankWithdrawal, Client, CompanyBank, Dividend, HistoryEntry } from '@/types';
+import { User, Supplier, BuyTransaction, SellTransaction, BankDeposit, BankWithdrawal, Client, CompanyBank, Dividend, HistoryEntry, CashInHand } from '@/types';
 
 export const SAMPLE_USERS: User[] = [
   {
@@ -427,6 +427,51 @@ export const SAMPLE_DIVIDENDS: Dividend[] = [
     remarks: 'Next weekly cycle',
     createdAt: '2026-02-14T10:00:00Z',
     createdBy: 'user-002',
+  },
+];
+
+export const HOLD_PURPOSES = ['Trading Capital', 'Client Settlement', 'Emergency Fund', 'Operational Expense', 'Petty Cash'] as const;
+
+export const SAMPLE_CASH_IN_HAND: CashInHand[] = [
+  {
+    id: 'cash-001',
+    cashierName: 'Rajesh Kumar',
+    cashAmount: 250000,
+    clientAssign: 'Arun Mehta',
+    holdPurpose: 'Trading Capital',
+    remarks: 'Held for upcoming USDT purchase',
+    createdAt: '2026-02-15T10:00:00Z',
+    createdBy: 'user-001',
+  },
+  {
+    id: 'cash-002',
+    cashierName: 'John Trader',
+    cashAmount: 150000,
+    clientAssign: 'Kavita Reddy',
+    holdPurpose: 'Client Settlement',
+    remarks: 'Pending dividend payout',
+    createdAt: '2026-02-14T14:00:00Z',
+    createdBy: 'user-002',
+  },
+  {
+    id: 'cash-003',
+    cashierName: 'Sarah Miller',
+    cashAmount: 75000,
+    clientAssign: 'Ravi Shankar',
+    holdPurpose: 'Emergency Fund',
+    remarks: 'Reserve cash for urgent deals',
+    createdAt: '2026-02-13T09:30:00Z',
+    createdBy: 'user-003',
+  },
+  {
+    id: 'cash-004',
+    cashierName: 'Admin User',
+    cashAmount: 500000,
+    clientAssign: 'Deepak Joshi',
+    holdPurpose: 'Operational Expense',
+    remarks: 'Office and operational costs',
+    createdAt: '2026-02-12T16:00:00Z',
+    createdBy: 'user-001',
   },
 ];
 

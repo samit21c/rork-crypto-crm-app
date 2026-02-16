@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, BarChart3, Shield, User, LogOut, ChevronRight, Building2, Clock, Landmark, Banknote, FileText } from 'lucide-react-native';
+import { Users, BarChart3, Shield, User, LogOut, ChevronRight, Building2, Clock, Landmark, Banknote, FileText, HandCoins } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,6 +15,7 @@ export default function MoreScreen() {
   };
 
   const menuItems = [
+    { label: 'Cash in Hand', sublabel: 'Track cash held by team', icon: HandCoins, color: Colors.cash, bg: Colors.cashLight, route: '/cash-in-hand' as const },
     { label: 'Deposits', sublabel: 'Bank deposit entries', icon: Landmark, color: Colors.deposit, bg: Colors.depositLight, route: '/deposits' as const },
     { label: 'Withdrawals', sublabel: 'Bank withdrawal entries', icon: Banknote, color: Colors.withdraw, bg: Colors.withdrawLight, route: '/withdrawals' as const },
     { label: 'Transactions', sublabel: 'Buy & sell history', icon: FileText, color: Colors.textSecondary, bg: Colors.surface, route: '/transactions' as const },

@@ -14,6 +14,7 @@ const SECTION_COLORS: Record<HistorySection, { color: string; bg: string }> = {
   SellTrade: { color: Colors.sell, bg: Colors.sellLight },
   Dividend: { color: Colors.dividend, bg: Colors.dividendLight },
   Supplier: { color: Colors.warning, bg: Colors.warningLight },
+  CashInHand: { color: Colors.cash, bg: Colors.cashLight },
 };
 
 const ACTION_ICONS: Record<HistoryAction, typeof Plus> = {

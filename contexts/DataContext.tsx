@@ -5,12 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BuyTransaction, SellTransaction, Supplier, Transaction, DashboardStats,
   BankDeposit, BankWithdrawal, Client, CompanyBank, Dividend, HistoryEntry,
-  HistorySection, HistoryAction,
+  HistorySection, HistoryAction, CashInHand,
 } from '@/types';
 import {
   SAMPLE_BUY_TRANSACTIONS, SAMPLE_SELL_TRANSACTIONS, SAMPLE_SUPPLIERS,
   SAMPLE_DEPOSITS, SAMPLE_WITHDRAWALS, SAMPLE_CLIENTS, SAMPLE_COMPANY_BANKS,
-  SAMPLE_DIVIDENDS, SAMPLE_HISTORY,
+  SAMPLE_DIVIDENDS, SAMPLE_HISTORY, SAMPLE_CASH_IN_HAND,
 } from '@/mocks/data';
 
 const BUY_KEY = '@usdt_crm_buy';
@@ -22,6 +22,7 @@ const CLIENTS_KEY = '@usdt_crm_clients';
 const COMPANY_BANKS_KEY = '@usdt_crm_company_banks';
 const DIVIDENDS_KEY = '@usdt_crm_dividends';
 const HISTORY_KEY = '@usdt_crm_history';
+const CASH_IN_HAND_KEY = '@usdt_crm_cash_in_hand';
 
 function generateDepositCode(): string {
   const now = new Date();
@@ -57,6 +58,7 @@ export const [DataProvider, useData] = createContextHook(() => {
   const [companyBanks, setCompanyBanks] = useState<CompanyBank[]>([]);
   const [dividends, setDividends] = useState<Dividend[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [cashInHand, setCashInHand] = useState<CashInHand[]>([]);
   const queryClient = useQueryClient();
 
   const buyQuery = useQuery({ queryKey: ['buyTransactions'], queryFn: () => loadOrSeed(BUY_KEY, SAMPLE_BUY_TRANSACTIONS) });
@@ -68,6 +70,7 @@ export const [DataProvider, useData] = createContextHook(() => {
   const companyBanksQuery = useQuery({ queryKey: ['companyBanks'], queryFn: () => loadOrSeed(COMPANY_BANKS_KEY, SAMPLE_COMPANY_BANKS) });
   const dividendsQuery = useQuery({ queryKey: ['dividends'], queryFn: () => loadOrSeed(DIVIDENDS_KEY, SAMPLE_DIVIDENDS) });
   const historyQuery = useQuery({ queryKey: ['history'], queryFn: () => loadOrSeed(HISTORY_KEY, SAMPLE_HISTORY) });
+  const cashInHandQuery = useQuery({ queryKey: ['cashInHand'], queryFn: () => loadOrSeed(CASH_IN_HAND_KEY, SAMPLE_CASH_IN_HAND) });
 
   useEffect(() => { if (buyQuery.data) setBuyTransactions(buyQuery.data); }, [buyQuery.data]);
   useEffect(() => { if (sellQuery.data) setSellTransactions(sellQuery.data); }, [sellQuery.data]);
@@ -78,6 +81,7 @@ export const [DataProvider, useData] = createContextHook(() => {
   useEffect(() => { if (companyBanksQuery.data) setCompanyBanks(companyBanksQuery.data); }, [companyBanksQuery.data]);
   useEffect(() => { if (dividendsQuery.data) setDividends(dividendsQuery.data); }, [dividendsQuery.data]);
   useEffect(() => { if (historyQuery.data) setHistory(historyQuery.data); }, [historyQuery.data]);
+  useEffect(() => { if (cashInHandQuery.data) setCashInHand(cashInHandQuery.data); }, [cashInHandQuery.data]);
 
   const persist = useCallback(async <T,>(key: string, data: T[], setter: (d: T[]) => void, qKey: string) => {
     await AsyncStorage.setItem(key, JSON.stringify(data));
@@ -94,6 +98,7 @@ export const [DataProvider, useData] = createContextHook(() => {
   const saveCompanyBanks = useCallback((data: CompanyBank[]) => persist(COMPANY_BANKS_KEY, data, setCompanyBanks, 'companyBanks'), [persist]);
   const saveDividends = useCallback((data: Dividend[]) => persist(DIVIDENDS_KEY, data, setDividends, 'dividends'), [persist]);
   const saveHistory = useCallback((data: HistoryEntry[]) => persist(HISTORY_KEY, data, setHistory, 'history'), [persist]);
+  const saveCashInHand = useCallback((data: CashInHand[]) => persist(CASH_IN_HAND_KEY, data, setCashInHand, 'cashInHand'), [persist]);
 
   const addHistoryEntry = useCallback(async (
     section: HistorySection, action: HistoryAction, entityId: string, entityLabel: string,
@@ -139,6 +144,10 @@ export const [DataProvider, useData] = createContextHook(() => {
   const addDividendMutation = useMutation({ mutationFn: async (d: Dividend) => { await saveDividends([d, ...dividends]); } });
   const updateDividendMutation = useMutation({ mutationFn: async (d: Dividend) => { await saveDividends(dividends.map(dv => dv.id === d.id ? d : dv)); } });
   const deleteDividendMutation = useMutation({ mutationFn: async (id: string) => { await saveDividends(dividends.filter(d => d.id !== id)); } });
+
+  const addCashInHandMutation = useMutation({ mutationFn: async (c: CashInHand) => { await saveCashInHand([c, ...cashInHand]); } });
+  const updateCashInHandMutation = useMutation({ mutationFn: async (c: CashInHand) => { await saveCashInHand(cashInHand.map(ch => ch.id === c.id ? c : ch)); } });
+  const deleteCashInHandMutation = useMutation({ mutationFn: async (id: string) => { await saveCashInHand(cashInHand.filter(c => c.id !== id)); } });
 
   const stats: DashboardStats = useMemo(() => {
     const totalBuyVolume = buyTransactions.reduce((sum, t) => sum + t.volume, 0);
@@ -197,11 +206,12 @@ export const [DataProvider, useData] = createContextHook(() => {
 
   const isLoading = buyQuery.isLoading || sellQuery.isLoading || suppliersQuery.isLoading ||
     depositsQuery.isLoading || withdrawalsQuery.isLoading || clientsQuery.isLoading ||
-    companyBanksQuery.isLoading || dividendsQuery.isLoading || historyQuery.isLoading;
+    companyBanksQuery.isLoading || dividendsQuery.isLoading || historyQuery.isLoading ||
+    cashInHandQuery.isLoading;
 
   return {
     buyTransactions, sellTransactions, suppliers, deposits, withdrawals,
-    clients, companyBanks, dividends, history,
+    clients, companyBanks, dividends, history, cashInHand,
     stats, allTransactions, isLoading,
     addBuy: addBuyMutation.mutateAsync,
     addSell: addSellMutation.mutateAsync,
@@ -227,6 +237,9 @@ export const [DataProvider, useData] = createContextHook(() => {
     addDividend: addDividendMutation.mutateAsync,
     updateDividend: updateDividendMutation.mutateAsync,
     deleteDividend: deleteDividendMutation.mutateAsync,
+    addCashInHand: addCashInHandMutation.mutateAsync,
+    updateCashInHand: updateCashInHandMutation.mutateAsync,
+    deleteCashInHand: deleteCashInHandMutation.mutateAsync,
     addHistoryEntry,
     getSupplierName, getClientName, getBankName,
     generateDepositCode,
