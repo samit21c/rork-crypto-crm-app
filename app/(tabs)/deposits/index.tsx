@@ -7,6 +7,7 @@ import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateDepositCode } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
+import { DatePickerInput } from '@/components/DatePickerInput';
 import { BankDeposit, DepositMode } from '@/types';
 import { DEPOSIT_MODES } from '@/mocks/data';
 
@@ -19,6 +20,7 @@ export default function DepositsScreen() {
   const [depositorBank, setDepositorBank] = useState('');
   const [amount, setAmount] = useState('');
   const [mode, setMode] = useState('');
+  const [depositDate, setDepositDate] = useState(new Date().toISOString());
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [lastCode, setLastCode] = useState('');
@@ -42,6 +44,7 @@ export default function DepositsScreen() {
     setDepositorBank('');
     setAmount('');
     setMode('');
+    setDepositDate(new Date().toISOString());
     setSuccess(false);
   }, []);
 
@@ -61,7 +64,7 @@ export default function DepositsScreen() {
         amount: parseFloat(amount),
         mode: mode as DepositMode,
         isVerified: false,
-        createdAt: new Date().toISOString(),
+        createdAt: depositDate || new Date().toISOString(),
         createdBy: currentUser?.id ?? '',
       };
       await addDeposit(deposit);
@@ -73,7 +76,7 @@ export default function DepositsScreen() {
     } finally {
       setSaving(false);
     }
-  }, [depositorName, depositorBank, amount, mode, currentUser, addDeposit]);
+  }, [depositorName, depositorBank, amount, mode, depositDate, currentUser, addDeposit]);
 
   const handleVerify = useCallback(async (deposit: BankDeposit) => {
     const updated: BankDeposit = {
@@ -149,6 +152,13 @@ export default function DepositsScreen() {
             <FormInput label="Depositor Bank" value={depositorBank} onChangeText={setDepositorBank} placeholder="e.g. HDFC Bank" testID="dep-bank" />
             <FormInput label={`Amount (${INR_SYMBOL})`} value={amount} onChangeText={setAmount} placeholder="e.g. 500000" keyboardType="numeric" testID="dep-amount" />
             <Dropdown label="Mode" value={mode} options={modeOptions} onSelect={setMode} placeholder="Select deposit mode" />
+            <DatePickerInput
+              label="Deposit Date"
+              value={depositDate}
+              onChange={setDepositDate}
+              placeholder="Select deposit date"
+              accentColor={Colors.deposit}
+            />
           </View>
 
           <View style={styles.buttonsRow}>
