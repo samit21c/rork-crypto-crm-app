@@ -92,6 +92,7 @@ export interface Client {
   dividendsAmt: number;
   dueFrequency: DueFrequency;
   specificDueDate?: string;
+  registrationDate: string;
   remarks: string;
   createdAt: string;
   createdBy: string;
@@ -115,6 +116,7 @@ export interface Dividend {
   id: string;
   clientId: string;
   dueDate: string;
+  paidDate?: string;
   paidAmount: number;
   totalPaid: number;
   nextDueDate: string;

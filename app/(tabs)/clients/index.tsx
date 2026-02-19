@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, TextInput } from 'react-native';
-import { Search, Plus, X, MapPin, Wallet, Calendar, ChevronRight, Trash2, Edit3, CheckCircle } from 'lucide-react-native';
+import { Search, Plus, X, MapPin, Wallet, Calendar as CalendarIcon, ChevronRight, Trash2, Edit3, CheckCircle } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateId } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
+import { DatePickerInput } from '@/components/DatePickerInput';
 import { Client, DueFrequency } from '@/types';
 import { DUE_FREQUENCIES } from '@/mocks/data';
 
@@ -23,6 +24,7 @@ export default function ClientsScreen() {
   const [tradingFund, setTradingFund] = useState('');
   const [dividendsAmt, setDividendsAmt] = useState('');
   const [dueFrequency, setDueFrequency] = useState('');
+  const [registrationDate, setRegistrationDate] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -55,6 +57,7 @@ export default function ClientsScreen() {
     setTradingFund('');
     setDividendsAmt('');
     setDueFrequency('');
+    setRegistrationDate('');
     setRemarks('');
     setSuccess(false);
     setEditingClient(null);
@@ -69,6 +72,7 @@ export default function ClientsScreen() {
     setTradingFund(client.tradingFund.toString());
     setDividendsAmt(client.dividendsAmt.toString());
     setDueFrequency(client.dueFrequency);
+    setRegistrationDate(client.registrationDate || '');
     setRemarks(client.remarks);
     setShowForm(true);
   }, []);
@@ -90,6 +94,7 @@ export default function ClientsScreen() {
           tradingFund: parseFloat(tradingFund) || 0,
           dividendsAmt: parseFloat(dividendsAmt) || 0,
           dueFrequency: (dueFrequency as DueFrequency) || 'Monthly',
+          registrationDate: registrationDate || editingClient.registrationDate,
           remarks: remarks.trim(),
         };
         await updateClient(updated);
@@ -105,6 +110,7 @@ export default function ClientsScreen() {
           tradingFund: parseFloat(tradingFund) || 0,
           dividendsAmt: parseFloat(dividendsAmt) || 0,
           dueFrequency: (dueFrequency as DueFrequency) || 'Monthly',
+          registrationDate: registrationDate || new Date().toISOString(),
           remarks: remarks.trim(),
           createdAt: new Date().toISOString(),
           createdBy: currentUser?.id ?? '',
@@ -120,7 +126,7 @@ export default function ClientsScreen() {
     } finally {
       setSaving(false);
     }
-  }, [name, city, contractFund, depositUID, tradingFund, dividendsAmt, dueFrequency, remarks, editingClient, currentUser, addClient, updateClient, addHistoryEntry]);
+  }, [name, city, contractFund, depositUID, tradingFund, dividendsAmt, dueFrequency, registrationDate, remarks, editingClient, currentUser, addClient, updateClient, addHistoryEntry]);
 
   const handleDelete = useCallback((client: Client) => {
     Alert.alert('Delete Client', `Are you sure you want to delete ${client.name}?`, [
@@ -182,6 +188,7 @@ export default function ClientsScreen() {
             <FormInput label={`Trading Fund (${INR_SYMBOL})`} value={tradingFund} onChangeText={setTradingFund} placeholder="e.g. 500000" keyboardType="numeric" testID="cli-trading" />
             <FormInput label={`Dividends Amount (${INR_SYMBOL})`} value={dividendsAmt} onChangeText={setDividendsAmt} placeholder="e.g. 15000" keyboardType="numeric" testID="cli-div" />
             <Dropdown label="Due Date Frequency" value={dueFrequency} options={freqOptions} onSelect={setDueFrequency} placeholder="Select frequency" />
+            <DatePickerInput label="Registration Date" value={registrationDate} onChange={setRegistrationDate} placeholder="When client registered" accentColor={Colors.client} />
             <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Additional notes..." multiline testID="cli-remarks" />
           </View>
 
@@ -248,7 +255,7 @@ export default function ClientsScreen() {
                   <Text style={styles.statLabel}>Trading</Text>
                 </View>
                 <View style={styles.clientStat}>
-                  <Calendar size={13} color={Colors.dividend} />
+                  <CalendarIcon size={13} color={Colors.dividend} />
                   <Text style={styles.statText}>{formatCurrency(client.dividendsAmt)}</Text>
                   <Text style={styles.statLabel}>{client.dueFrequency}</Text>
                 </View>
@@ -258,6 +265,13 @@ export default function ClientsScreen() {
                   </View>
                 ) : null}
               </View>
+
+              {client.registrationDate ? (
+                <View style={styles.regDateRow}>
+                  <CalendarIcon size={11} color={Colors.client} />
+                  <Text style={styles.regDateText}>Registered: {new Date(client.registrationDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</Text>
+                </View>
+              ) : null}
 
               <View style={styles.clientBottom}>
                 <Text style={styles.clientId}>ID: {client.id}</Text>
@@ -330,6 +344,8 @@ const styles = StyleSheet.create({
   clientActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   editBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: Colors.clientLight, alignItems: 'center', justifyContent: 'center' },
   deleteBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: Colors.dangerLight, alignItems: 'center', justifyContent: 'center' },
+  regDateRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 10, paddingHorizontal: 2 },
+  regDateText: { fontSize: 11, color: Colors.client, fontWeight: '500' as const },
   emptyState: { alignItems: 'center', paddingVertical: 48 },
   emptyText: { fontSize: 15, fontWeight: '600' as const, color: Colors.textSecondary },
   emptySubtext: { fontSize: 13, color: Colors.textMuted, marginTop: 4 },

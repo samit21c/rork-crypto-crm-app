@@ -7,6 +7,7 @@ import { formatINR, INR_SYMBOL } from '@/constants/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData, generateId } from '@/contexts/DataContext';
 import { FormInput, Dropdown } from '@/components/FormInput';
+import { DatePickerInput } from '@/components/DatePickerInput';
 import { Dividend, DividendStatus } from '@/types';
 
 function computeNextDueDate(currentDue: string, frequency: string): string {
@@ -29,6 +30,7 @@ export default function DividendsScreen() {
   const [clientId, setClientId] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [assignedBankId, setAssignedBankId] = useState('');
+  const [paidDate, setPaidDate] = useState('');
   const [remarks, setRemarks] = useState('');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -67,6 +69,7 @@ export default function DividendsScreen() {
     setClientId('');
     setPaidAmount('');
     setAssignedBankId('');
+    setPaidDate('');
     setRemarks('');
     setSuccess(false);
     setEditingDiv(null);
@@ -77,6 +80,7 @@ export default function DividendsScreen() {
     setClientId(div.clientId);
     setPaidAmount(div.paidAmount.toString());
     setAssignedBankId(div.assignedBankId ?? '');
+    setPaidDate(div.paidDate ?? '');
     setRemarks(div.remarks);
     setShowForm(true);
   }, []);
@@ -101,6 +105,7 @@ export default function DividendsScreen() {
           clientId,
           paidAmount: paid,
           totalPaid: existingPaidForClient + paid,
+          paidDate: paidDate || (paid > 0 ? now : undefined),
           assignedBankId: assignedBankId || undefined,
           status: paid > 0 ? 'Paid' : (new Date(editingDiv.dueDate) < new Date() ? 'Overdue' : 'Pending'),
           remarks: remarks.trim(),
@@ -117,6 +122,7 @@ export default function DividendsScreen() {
           id: generateId('div'),
           clientId,
           dueDate,
+          paidDate: paidDate || (paid > 0 ? now : undefined),
           paidAmount: paid,
           totalPaid: existingPaidForClient + paid,
           nextDueDate: computeNextDueDate(dueDate, freq),
@@ -136,7 +142,7 @@ export default function DividendsScreen() {
     } finally {
       setSaving(false);
     }
-  }, [clientId, paidAmount, assignedBankId, remarks, editingDiv, clients, dividends, currentUser, addDividend, updateDividend, addHistoryEntry, getClientName]);
+  }, [clientId, paidAmount, paidDate, assignedBankId, remarks, editingDiv, clients, dividends, currentUser, addDividend, updateDividend, addHistoryEntry, getClientName]);
 
   const handleDelete = useCallback((div: Dividend) => {
     Alert.alert('Delete Dividend', 'Are you sure you want to delete this dividend entry?', [
@@ -230,6 +236,7 @@ export default function DividendsScreen() {
             )}
 
             <FormInput label={`Paid Amount (${INR_SYMBOL})`} value={paidAmount} onChangeText={setPaidAmount} placeholder="e.g. 15000" keyboardType="numeric" testID="div-paid" />
+            <DatePickerInput label="Paid Date" value={paidDate} onChange={setPaidDate} placeholder="Select paid date (for past entries)" accentColor={Colors.dividend} />
             <Dropdown label="Assign Bank" value={assignedBankId} options={bankOptions} onSelect={setAssignedBankId} placeholder="Select company bank" />
             <FormInput label="Remarks" value={remarks} onChangeText={setRemarks} placeholder="Additional notes..." multiline testID="div-remarks" />
           </View>
@@ -308,10 +315,17 @@ export default function DividendsScreen() {
                     {formatDate(div.dueDate)}
                   </Text>
                 </View>
-                <View style={styles.divDetail}>
-                  <Text style={styles.detailLabel}>Total Paid</Text>
-                  <Text style={styles.detailValue}>{formatINR(div.totalPaid)}</Text>
-                </View>
+                {div.paidDate ? (
+                  <View style={styles.divDetail}>
+                    <Text style={styles.detailLabel}>Paid Date</Text>
+                    <Text style={[styles.detailValue, { color: Colors.accent }]}>{formatDate(div.paidDate)}</Text>
+                  </View>
+                ) : (
+                  <View style={styles.divDetail}>
+                    <Text style={styles.detailLabel}>Total Paid</Text>
+                    <Text style={styles.detailValue}>{formatINR(div.totalPaid)}</Text>
+                  </View>
+                )}
                 <View style={styles.divDetail}>
                   <Text style={styles.detailLabel}>Next Due</Text>
                   <Text style={styles.detailValue}>{formatDate(div.nextDueDate)}</Text>
